@@ -414,6 +414,26 @@ closeButton.MouseButton1Click:Connect(function()
     commandPanel.Visible = false
 end)
 
+-- Tool Teleport function (Moderator rank)
+local function loadToolTeleport()
+    if not hasPermission(player, "Moderator") then
+        addLog("Permission denied: You need Moderator+ rank to use Tool Teleport")
+        return false
+    end
+    
+    local success, err = pcall(function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Teleport-tool-131546"))()
+    end)
+    
+    if success then
+        addLog("Tool Teleport loaded successfully (Moderator+ rank required)")
+        return true
+    else
+        addLog("Failed to load Tool Teleport: " .. tostring(err))
+        return false
+    end
+end
+
 -- Dex/Explorer function (Admin rank)
 local function openDexExplorer()
     local success, err = pcall(function()
@@ -768,6 +788,7 @@ local function showCommandsPanel()
     end
     
     local commands = {
+        {cmd = "toolteleport", desc = "Load tool teleport script", rank = "Moderator", rankLevel = 60},
         {cmd = "dex / explorer", desc = "Open Dex Explorer (exploit tool)", rank = "Admin", rankLevel = 70},
         {cmd = "antivoid", desc = "Load anti-void script", rank = "Admin", rankLevel = 70},
         {cmd = "antisit", desc = "Toggle anti-sit", rank = "Admin", rankLevel = 70},
@@ -889,7 +910,16 @@ player.Chatted:Connect(function(msg)
             else
                 addLog("Usage: " .. prefix .. command .. " <player name>")
             end
-        
+
+        elseif command == "toolteleport" then
+            if not hasPermission(player, "Moderator") then
+                addLog("Permission denied: " .. player.Name .. " tried to use toolteleport (Required: Moderator)")
+                return
+            end
+            loadToolTeleport()
+            commandCount = commandCount + 1
+            counterLabel.Text = tostring(commandCount)
+
         elseif command == "dex" or command == "explorer" then
             if not hasPermission(player, "Admin") then
                 addLog("Permission denied: " .. player.Name .. " tried to use " .. command .. " (Required: Admin)")
