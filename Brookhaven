@@ -414,36 +414,85 @@ closeButton.MouseButton1Click:Connect(function()
     commandPanel.Visible = false
 end)
 
--- ============================================
--- LOG FUNCTION
--- ============================================
-local function addLog(message)
-    table.insert(logs, 1, os.date("%H:%M:%S") .. " - " .. message)
-    if #logs > 30 then table.remove(logs) end
+local function messyFling(target)
+    if flinging then return end
+    flinging = true
 
-    for _, child in pairs(logList:GetChildren()) do
-        if child:IsA("TextLabel") then child:Destroy() end
+    local targetChar = target.Character
+    local myChar = player.Character
+    if not targetChar or not myChar then flinging = false return end
+
+    local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
+    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+    if not targetRoot or not myRoot then flinging = false return end
+
+    local originalCFrame = myRoot.CFrame
+    local hum = myChar:FindFirstChildOfClass("Humanoid")
+    if hum then
+        hum:ChangeState(Enum.HumanoidStateType.Physics)
+        hum.PlatformStand = true
     end
 
-    for i, log in ipairs(logs) do
-        local logLabel = Instance.new("TextLabel")
-        logLabel.Size = UDim2.new(1, -10, 0, 18)
-        logLabel.Position = UDim2.new(0, 5, 0, 0)
-        logLabel.Text = log
-        logLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-        logLabel.TextSize = 11
-        logLabel.TextXAlignment = Enum.TextXAlignment.Left
-        logLabel.BackgroundTransparency = 1
-        logLabel.Parent = logList
-    end
+    myRoot.AssemblyLinearVelocity = Vector3.zero
+    myRoot.AssemblyAngularVelocity = Vector3.zero
 
-    logList.CanvasSize = UDim2.new(0, 0, 0, #logs * 20)
+    local bp = Instance.new("BodyPosition")
+    bp.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bp.D = 100; bp.P = 50000; bp.Parent = myRoot
+
+    local bg = Instance.new("BodyGyro")
+    bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+    bg.D = 10; bg.P = 10000; bg.Parent = myRoot
+
+    local bav = Instance.new("BodyAngularVelocity")
+    bav.AngularVelocity = Vector3.new(math.random(-30,30), math.random(-60,60), math.random(-30,30))
+    bav.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+    bav.Parent = myRoot
+
+    local connection
+    local elapsed = 0
+
+    connection = game:GetService("RunService").Heartbeat:Connect(function(dt)
+        elapsed = elapsed + dt
+        targetChar = target.Character
+        myChar = player.Character
+        if not targetChar or not myChar then connection:Disconnect() flinging = false return end
+
+        targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
+        myRoot = myChar:FindFirstChild("HumanoidRootPart")
+        if not targetRoot or not myRoot then connection:Disconnect() flinging = false return end
+
+        bp.Position = targetRoot.Position + Vector3.new(math.random(-2,2), math.random(0,3), math.random(-2,2))
+        bg.CFrame = CFrame.Angles(math.random(-10,10)*0.05, math.random(-10,10)*0.05, math.random(-10,10)*0.05)
+
+        local bv = Instance.new("BodyVelocity")
+        bv.Velocity = Vector3.new(math.random(-200,200), math.random(50,300), math.random(-200,200))
+        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        bv.Parent = targetRoot
+        game:GetService("Debris"):AddItem(bv, 0.05)
+
+        local ba = Instance.new("BodyAngularVelocity")
+        ba.AngularVelocity = Vector3.new(math.random(-40,40), math.random(-40,40), math.random(-40,40))
+        ba.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+        ba.Parent = targetRoot
+        game:GetService("Debris"):AddItem(ba, 0.05)
+
+        if elapsed >= 1 then
+            connection:Disconnect()
+            bp:Destroy(); bg:Destroy(); bav:Destroy()
+            flinging = false
+            if myRoot then
+                myRoot.CFrame = originalCFrame
+                myRoot.AssemblyLinearVelocity = Vector3.zero
+                myRoot.AssemblyAngularVelocity = Vector3.zero
+            end
+            if hum then
+                hum.PlatformStand = false
+                hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+            end
+        end
+    end)
 end
-
-rightSectionButton.MouseButton1Click:Connect(function()
-    logPanel.Visible = not logPanel.Visible
-    if commandPanel.Visible then commandPanel.Visible = false end
-end)
 
 -- Tool Teleport function (Moderator rank)
 local function loadToolTeleport()
@@ -819,6 +868,7 @@ local function showCommandsPanel()
     end
     
     local commands = {
+        {cmd = "bring <player>", desc = "Fling/bring a player to you", rank = "Head Admin", rankLevel = 80},
         {cmd = "toolteleport", desc = "Load tool teleport script", rank = "Moderator", rankLevel = 60},
         {cmd = "dex / explorer", desc = "Open Dex Explorer (exploit tool)", rank = "Admin", rankLevel = 70},
         {cmd = "antivoid", desc = "Load anti-void script", rank = "Admin", rankLevel = 70},
@@ -950,6 +1000,29 @@ player.Chatted:Connect(function(msg)
             loadToolTeleport()
             commandCount = commandCount + 1
             counterLabel.Text = tostring(commandCount)
+
+        elseif command == "bring" then
+            if not hasPermission(player, "Head Admin") then
+                addLog("Permission denied: " .. player.Name .. " tried to use bring (Required: Head Admin)")
+                return
+            end
+            if targetName then
+                local target = findPlayer(targetName)
+                if target then
+                    if target == player then
+                        addLog("You cannot bring yourself!")
+                    else
+                        messyFling(target)
+                        commandCount = commandCount + 1
+                        counterLabel.Text = tostring(commandCount)
+                        addLog(player.Name .. " [" .. getPlayerRank(player) .. "] used bring on " .. target.Name)
+                    end
+                else
+                    addLog("Player not found: " .. targetName)
+                end
+            else
+                addLog("Usage: " .. prefix .. "bring <player name>")
+            end
 
         elseif command == "dex" or command == "explorer" then
             if not hasPermission(player, "Admin") then
