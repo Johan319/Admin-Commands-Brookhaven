@@ -495,6 +495,26 @@ local function messyFling(target)
     end)
 end
 
+-- Tool Teleport function (Moderator rank)
+local function loadToolTeleport()
+    if not hasPermission(player, "Moderator") then
+        addLog("Permission denied: You need Moderator+ rank to use Tool Teleport")
+        return false
+    end
+    
+    local success, err = pcall(function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Teleport-tool-131546"))()
+    end)
+    
+    if success then
+        addLog("Tool Teleport loaded successfully (Moderator+ rank required)")
+        return true
+    else
+        addLog("Failed to load Tool Teleport: " .. tostring(err))
+        return false
+    end
+end
+
 -- Dex/Explorer function (Admin rank)
 local function openDexExplorer()
     local success, err = pcall(function()
