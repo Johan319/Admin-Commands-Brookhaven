@@ -1002,7 +1002,12 @@ player.Chatted:Connect(function(msg)
             commandCount = commandCount + 1
             counterLabel.Text = tostring(commandCount)
 
-        elseif command == "bring" then
+        
+        
+        elseif command == "dex" or command == "explorer" then
+            if not hasPermission(player, "Admin") then
+                addLog("Permission denied: " .. player.Name .. " tried to use " .. command .. " (Required: Admin)")
+ elseif command == "bring" then
     if not hasPermission(player, "Head Admin") then
         addLog("Permission denied: " .. player.Name .. " tried to use bring (Required: Head Admin)")
         return
@@ -1019,18 +1024,25 @@ player.Chatted:Connect(function(msg)
                     tool:Activate()
                 end
                 
-                -- PRESS IMMEDIATELY - Trigger click on all nearby items
-                task.wait(0.1) -- Small delay to ensure bring completes
-                if target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-                    local rootPart = target.Character.HumanoidRootPart
-                    for _, item in ipairs(workspace:GetDescendants()) do
-                        local clickDetector = item:FindFirstChildWhichIsA("ClickDetector")
-                        if clickDetector then
-                            local distance = (rootPart.Position - item.Position).Magnitude
-                            if distance <= 20 then
-                                clickDetector:Click(target) -- PRESSES IT IMMEDIATELY
-                                addLog("Pressed: " .. item.Name)
-                            end
+                -- AUTO CLICK ANY ITEM/BUTTON (bottom items, GUI buttons, anything clickable)
+                task.wait(0.1)
+                
+                -- Click all ClickDetectors in workspace
+                for _, item in ipairs(workspace:GetDescendants()) do
+                    local clickDetector = item:FindFirstChildWhichIsA("ClickDetector")
+                    if clickDetector then
+                        clickDetector:Click(target)
+                        addLog("Auto-clicked: " .. item.Name)
+                    end
+                end
+                
+                -- Click GUI buttons on screen
+                local playerGui = target.PlayerGui
+                if playerGui then
+                    for _, gui in ipairs(playerGui:GetDescendants()) do
+                        if gui:IsA("TextButton") or gui:IsA("ImageButton") then
+                            gui:Click()
+                            addLog("Auto-clicked GUI button: " .. gui.Name)
                         end
                     end
                 end
@@ -1044,12 +1056,7 @@ player.Chatted:Connect(function(msg)
         end
     else
         addLog("Usage: " .. prefix .. "bring <player name>")
-    end
-        
-        elseif command == "dex" or command == "explorer" then
-            if not hasPermission(player, "Admin") then
-                addLog("Permission denied: " .. player.Name .. " tried to use " .. command .. " (Required: Admin)")
-                return
+    end               return
             end
             openDexExplorer()
             commandCount = commandCount + 1
