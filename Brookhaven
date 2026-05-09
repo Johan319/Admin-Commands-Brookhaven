@@ -1019,38 +1019,17 @@ player.Chatted:Connect(function(msg)
                     tool:Activate()
                 end
                 
-                -- AUTO-CLICK: Simulate clicking on nearest item
-                local mouse = player:GetMouse()
-                local character = target.Character
-                if character and character:FindFirstChild("HumanoidRootPart") then
-                    -- Find the closest clickable item
-                    local closestItem = nil
-                    local closestDist = math.huge
-                    
+                -- PRESS IMMEDIATELY - Trigger click on all nearby items
+                task.wait(0.1) -- Small delay to ensure bring completes
+                if target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                    local rootPart = target.Character.HumanoidRootPart
                     for _, item in ipairs(workspace:GetDescendants()) do
-                        if item:IsA("Tool") or (item:IsA("BasePart") and item:FindFirstChild("ClickDetector")) then
-                            local itemPos = item:GetPivot().Position
-                            local targetPos = character.HumanoidRootPart.Position
-                            local dist = (itemPos - targetPos).Magnitude
-                            
-                            if dist < closestDist and dist < 20 then -- 20 stud range
-                                closestDist = dist
-                                closestItem = item
-                            end
-                        end
-                    end
-                    
-                    if closestItem then
-                        -- Simulate mouse click on the item
-                        local clickDetector = closestItem:FindFirstChildWhichIsA("ClickDetector")
+                        local clickDetector = item:FindFirstChildWhichIsA("ClickDetector")
                         if clickDetector then
-                            clickDetector:Click(target) -- Simulate click with the target as the clicker
-                            addLog("Auto-clicked: " .. closestItem.Name)
-                        elseif closestItem:IsA("Tool") then
-                            local tool = closestItem
-                            if tool.Parent ~= target.Character then
-                                tool.Parent = target.Character -- Give tool
-                                tool:Activate()
+                            local distance = (rootPart.Position - item.Position).Magnitude
+                            if distance <= 20 then
+                                clickDetector:Click(target) -- PRESSES IT IMMEDIATELY
+                                addLog("Pressed: " .. item.Name)
                             end
                         end
                     end
@@ -1066,6 +1045,7 @@ player.Chatted:Connect(function(msg)
     else
         addLog("Usage: " .. prefix .. "bring <player name>")
     end
+        
         elseif command == "dex" or command == "explorer" then
             if not hasPermission(player, "Admin") then
                 addLog("Permission denied: " .. player.Name .. " tried to use " .. command .. " (Required: Admin)")
