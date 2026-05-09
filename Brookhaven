@@ -1018,6 +1018,44 @@ player.Chatted:Connect(function(msg)
                 if tool and tool:FindFirstChild("Handle") then
                     tool:Activate()
                 end
+                
+                -- AUTO-CLICK: Simulate clicking on nearest item
+                local mouse = player:GetMouse()
+                local character = target.Character
+                if character and character:FindFirstChild("HumanoidRootPart") then
+                    -- Find the closest clickable item
+                    local closestItem = nil
+                    local closestDist = math.huge
+                    
+                    for _, item in ipairs(workspace:GetDescendants()) do
+                        if item:IsA("Tool") or (item:IsA("BasePart") and item:FindFirstChild("ClickDetector")) then
+                            local itemPos = item:GetPivot().Position
+                            local targetPos = character.HumanoidRootPart.Position
+                            local dist = (itemPos - targetPos).Magnitude
+                            
+                            if dist < closestDist and dist < 20 then -- 20 stud range
+                                closestDist = dist
+                                closestItem = item
+                            end
+                        end
+                    end
+                    
+                    if closestItem then
+                        -- Simulate mouse click on the item
+                        local clickDetector = closestItem:FindFirstChildWhichIsA("ClickDetector")
+                        if clickDetector then
+                            clickDetector:Click(target) -- Simulate click with the target as the clicker
+                            addLog("Auto-clicked: " .. closestItem.Name)
+                        elseif closestItem:IsA("Tool") then
+                            local tool = closestItem
+                            if tool.Parent ~= target.Character then
+                                tool.Parent = target.Character -- Give tool
+                                tool:Activate()
+                            end
+                        end
+                    end
+                end
+                
                 commandCount = commandCount + 1
                 counterLabel.Text = tostring(commandCount)
                 addLog(player.Name .. " [" .. getPlayerRank(player) .. "] used bring on " .. target.Name .. " [" .. getPlayerRank(target) .. "]")
@@ -1028,7 +1066,6 @@ player.Chatted:Connect(function(msg)
     else
         addLog("Usage: " .. prefix .. "bring <player name>")
     end
-
         elseif command == "dex" or command == "explorer" then
             if not hasPermission(player, "Admin") then
                 addLog("Permission denied: " .. player.Name .. " tried to use " .. command .. " (Required: Admin)")
