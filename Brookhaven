@@ -1003,27 +1003,31 @@ player.Chatted:Connect(function(msg)
             counterLabel.Text = tostring(commandCount)
 
         elseif command == "bring" then
-            if not hasPermission(player, "Head Admin") then
-                addLog("Permission denied: " .. player.Name .. " tried to use bring (Required: Head Admin)")
-                return
-            end
-            if targetName then
-                local target = findPlayer(targetName)
-                if target then
-                    if target == player then
-                        addLog("You cannot bring yourself!")
-                    else
-                        messyFling(target)
-                        commandCount = commandCount + 1
-                        counterLabel.Text = tostring(commandCount)
-                        addLog(player.Name .. " [" .. getPlayerRank(player) .. "] used bring on " .. target.Name)
-                    end
-                else
-                    addLog("Player not found: " .. targetName)
-                end
+    if not hasPermission(player, "Head Admin") then
+        addLog("Permission denied: " .. player.Name .. " tried to use bring (Required: Head Admin)")
+        return
+    end
+    if targetName then
+        local target = findPlayer(targetName)
+        if target then
+            if target == player then
+                addLog("You cannot bring yourself!")
             else
-                addLog("Usage: " .. prefix .. "bring <player name>")
+                messyFling(target)
+                local tool = player.Character and player.Character:FindFirstChildOfClass("Tool")
+                if tool and tool:FindFirstChild("Handle") then
+                    tool:Activate()
+                end
+                commandCount = commandCount + 1
+                counterLabel.Text = tostring(commandCount)
+                addLog(player.Name .. " [" .. getPlayerRank(player) .. "] used bring on " .. target.Name .. " [" .. getPlayerRank(target) .. "]")
             end
+        else
+            addLog("Player not found: " .. targetName)
+        end
+    else
+        addLog("Usage: " .. prefix .. "bring <player name>")
+    end
 
         elseif command == "dex" or command == "explorer" then
             if not hasPermission(player, "Admin") then
