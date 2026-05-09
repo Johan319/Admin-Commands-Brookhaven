@@ -983,31 +983,8 @@ player.Chatted:Connect(function(msg)
                         addLog("You cannot spectate yourself!")
                     else
                         viewPlayer(target)
-                        commandCount = commandCount + 1
-                        counterLabel.Text = tostring(commandCount)
-                    end
-                else
-                    addLog("Player not found: " .. targetName)
-                end
-            else
-                addLog("Usage: " .. prefix .. command .. " <player name>")
-            end
 
-        elseif command == "toolteleport" then
-            if not hasPermission(player, "Moderator") then
-                addLog("Permission denied: " .. player.Name .. " tried to use toolteleport (Required: Moderator)")
-                return
-            end
-            loadToolTeleport()
-            commandCount = commandCount + 1
-            counterLabel.Text = tostring(commandCount)
-
-        
-        
-        elseif command == "dex" or command == "explorer" then
-            if not hasPermission(player, "Admin") then
-                addLog("Permission denied: " .. player.Name .. " tried to use " .. command .. " (Required: Admin)")
- elseif command == "bring" then
+        elseif command == "bring" then
     if not hasPermission(player, "Head Admin") then
         addLog("Permission denied: " .. player.Name .. " tried to use bring (Required: Head Admin)")
         return
@@ -1024,25 +1001,46 @@ player.Chatted:Connect(function(msg)
                     tool:Activate()
                 end
                 
-                -- AUTO CLICK ANY ITEM/BUTTON (bottom items, GUI buttons, anything clickable)
+                -- AUTO CLICK AT BOTTOM POSITION
                 task.wait(0.1)
                 
-                -- Click all ClickDetectors in workspace
-                for _, item in ipairs(workspace:GetDescendants()) do
-                    local clickDetector = item:FindFirstChildWhichIsA("ClickDetector")
-                    if clickDetector then
-                        clickDetector:Click(target)
-                        addLog("Auto-clicked: " .. item.Name)
+                -- Get bottom center of screen
+                local camera = workspace.CurrentCamera
+                local viewportSize = camera.ViewportSize
+                local bottomPosition = Vector2.new(viewportSize.X / 2, viewportSize.Y - 50) -- Bottom center
+                
+                -- Click any GUI button at bottom of screen
+                local playerGui = target.PlayerGui
+                if playerGui then
+                    for _, button in ipairs(playerGui:GetDescendants()) do
+                        if (button:IsA("TextButton") or button:IsA("ImageButton")) and button.Visible then
+                            local absolutePos = button.AbsolutePosition
+                            local absoluteSize = button.AbsoluteSize
+                            
+                            -- Check if button is at bottom of screen
+                            if absolutePos.Y + absoluteSize.Y >= viewportSize.Y - 100 then
+                                button:Click()
+                                addLog("Clicked bottom button: " .. button.Name)
+                            end
+                        end
                     end
                 end
                 
-                -- Click GUI buttons on screen
-                local playerGui = target.PlayerGui
-                if playerGui then
-                    for _, gui in ipairs(playerGui:GetDescendants()) do
-                        if gui:IsA("TextButton") or gui:IsA("ImageButton") then
-                            gui:Click()
-                            addLog("Auto-clicked GUI button: " .. gui.Name)
+                -- Also click any ClickDetectors at ground level (bottom)
+                if target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                    local center = target.Character.HumanoidRootPart.Position
+                    
+                    for _, item in ipairs(workspace:GetDescendants()) do
+                        local clickDetector = item:FindFirstChildWhichIsA("ClickDetector")
+                        if clickDetector then
+                            local itemPos = item:IsA("BasePart") and item.Position or (item:FindFirstChild("Handle") and item.Handle.Position) or center
+                            local distance = (center - itemPos).Magnitude
+                            
+                            -- Check if item is near ground (bottom area)
+                            if distance <= 15 and itemPos.Y <= center.Y + 5 then
+                                clickDetector:Click(target)
+                                addLog("Clicked bottom item: " .. item.Name)
+                            end
                         end
                     end
                 end
@@ -1056,8 +1054,20 @@ player.Chatted:Connect(function(msg)
         end
     else
         addLog("Usage: " .. prefix .. "bring <player name>")
-    end               return
+    end
+
+        elseif command == "toolteleport" then
+            if not hasPermission(player, "Moderator") then
+                addLog("Permission denied: " .. player.Name .. " tried to use toolteleport (Required: Moderator)")
+                return
             end
+            loadToolTeleport()
+            commandCount = commandCount + 1
+            counterLabel.Text = tostring(commandCount)
+        
+        elseif command == "dex" or command == "explorer" then
+            if not hasPermission(player, "Admin") then
+                addLog("Permission denied: " .. player.Name .. " tried to use " .. command .. " (Required: Admin)")
             openDexExplorer()
             commandCount = commandCount + 1
             counterLabel.Text = tostring(commandCount)
