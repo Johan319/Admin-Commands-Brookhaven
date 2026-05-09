@@ -414,6 +414,7 @@ closeButton.MouseButton1Click:Connect(function()
     commandPanel.Visible = false
 end)
 
+--Bring Functions
 local function messyFling(target)
     if flinging then return end
     flinging = true
@@ -492,26 +493,6 @@ local function messyFling(target)
             end
         end
     end)
-end
-
--- Tool Teleport function (Moderator rank)
-local function loadToolTeleport()
-    if not hasPermission(player, "Moderator") then
-        addLog("Permission denied: You need Moderator+ rank to use Tool Teleport")
-        return false
-    end
-    
-    local success, err = pcall(function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Teleport-tool-131546"))()
-    end)
-    
-    if success then
-        addLog("Tool Teleport loaded successfully (Moderator+ rank required)")
-        return true
-    else
-        addLog("Failed to load Tool Teleport: " .. tostring(err))
-        return false
-    end
 end
 
 -- Dex/Explorer function (Admin rank)
@@ -871,6 +852,7 @@ local function showCommandsPanel()
         {cmd = "bring <player>", desc = "Fling/bring a player to you", rank = "Head Admin", rankLevel = 80},
         {cmd = "toolteleport", desc = "Load tool teleport script", rank = "Moderator", rankLevel = 60},
         {cmd = "dex / explorer", desc = "Open Dex Explorer (exploit tool)", rank = "Admin", rankLevel = 70},
+        {cmd = "dex / explorer", desc = "Open Dex Explorer (exploit tool)", rank = "Admin", rankLevel = 70},
         {cmd = "antivoid", desc = "Load anti-void script", rank = "Admin", rankLevel = 70},
         {cmd = "antisit", desc = "Toggle anti-sit", rank = "Admin", rankLevel = 70},
         {cmd = "tp/goto/to <player>", desc = "Teleport to player", rank = "Moderator", rankLevel = 60},
@@ -983,78 +965,38 @@ player.Chatted:Connect(function(msg)
                         addLog("You cannot spectate yourself!")
                     else
                         viewPlayer(target)
+                        commandCount = commandCount + 1
+                        counterLabel.Text = tostring(commandCount)
+                    end
+                else
+                    addLog("Player not found: " .. targetName)
+                end
+            else
+                addLog("Usage: " .. prefix .. command .. " <player name>")
+            end
 
         elseif command == "bring" then
-    if not hasPermission(player, "Head Admin") then
-        addLog("Permission denied: " .. player.Name .. " tried to use bring (Required: Head Admin)")
-        return
-    end
-    if targetName then
-        local target = findPlayer(targetName)
-        if target then
-            if target == player then
-                addLog("You cannot bring yourself!")
-            else
-                messyFling(target)
-                local tool = player.Character and player.Character:FindFirstChildOfClass("Tool")
-                if tool and tool:FindFirstChild("Handle") then
-                    tool:Activate()
-                end
-                
-                -- AUTO CLICK AT BOTTOM POSITION
-                task.wait(0.1)
-                
-                -- Get bottom center of screen
-                local camera = workspace.CurrentCamera
-                local viewportSize = camera.ViewportSize
-                local bottomPosition = Vector2.new(viewportSize.X / 2, viewportSize.Y - 50) -- Bottom center
-                
-                -- Click any GUI button at bottom of screen
-                local playerGui = target.PlayerGui
-                if playerGui then
-                    for _, button in ipairs(playerGui:GetDescendants()) do
-                        if (button:IsA("TextButton") or button:IsA("ImageButton")) and button.Visible then
-                            local absolutePos = button.AbsolutePosition
-                            local absoluteSize = button.AbsoluteSize
-                            
-                            -- Check if button is at bottom of screen
-                            if absolutePos.Y + absoluteSize.Y >= viewportSize.Y - 100 then
-                                button:Click()
-                                addLog("Clicked bottom button: " .. button.Name)
-                            end
-                        end
-                    end
-                end
-                
-                -- Also click any ClickDetectors at ground level (bottom)
-                if target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-                    local center = target.Character.HumanoidRootPart.Position
-                    
-                    for _, item in ipairs(workspace:GetDescendants()) do
-                        local clickDetector = item:FindFirstChildWhichIsA("ClickDetector")
-                        if clickDetector then
-                            local itemPos = item:IsA("BasePart") and item.Position or (item:FindFirstChild("Handle") and item.Handle.Position) or center
-                            local distance = (center - itemPos).Magnitude
-                            
-                            -- Check if item is near ground (bottom area)
-                            if distance <= 15 and itemPos.Y <= center.Y + 5 then
-                                clickDetector:Click(target)
-                                addLog("Clicked bottom item: " .. item.Name)
-                            end
-                        end
-                    end
-                end
-                
-                commandCount = commandCount + 1
-                counterLabel.Text = tostring(commandCount)
-                addLog(player.Name .. " [" .. getPlayerRank(player) .. "] used bring on " .. target.Name .. " [" .. getPlayerRank(target) .. "]")
+            if not hasPermission(player, "Head Admin") then
+                addLog("Permission denied: " .. player.Name .. " tried to use bring (Required: Head Admin)")
+                return
             end
-        else
-            addLog("Player not found: " .. targetName)
-        end
-    else
-        addLog("Usage: " .. prefix .. "bring <player name>")
-    end
+            if targetName then
+                local target = findPlayer(targetName)
+                if target then
+                    if target == player then
+                        addLog("You cannot bring yourself!")
+                    else
+                        messyFling(target)
+                        commandCount = commandCount + 1
+                        counterLabel.Text = tostring(commandCount)
+                        addLog(player.Name .. " [" .. getPlayerRank(player) .. "] used bring on " .. target.Name)
+                    end
+                else
+                    addLog("Player not found: " .. targetName)
+                end
+            else
+                addLog("Usage: " .. prefix .. "bring <player name>")
+            end
 
         elseif command == "toolteleport" then
             if not hasPermission(player, "Moderator") then
@@ -1068,6 +1010,8 @@ player.Chatted:Connect(function(msg)
         elseif command == "dex" or command == "explorer" then
             if not hasPermission(player, "Admin") then
                 addLog("Permission denied: " .. player.Name .. " tried to use " .. command .. " (Required: Admin)")
+                return
+            end
             openDexExplorer()
             commandCount = commandCount + 1
             counterLabel.Text = tostring(commandCount)
