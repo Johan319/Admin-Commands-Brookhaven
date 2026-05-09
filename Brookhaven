@@ -495,6 +495,18 @@ local function messyFling(target)
     end)
 end
 
+-- Dex/Explorer function (Admin rank)
+local function openDexExplorer()
+    local success, err = pcall(function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Dex-Explorer-DPP-73687"))()
+    end)
+    if success then
+        addLog("Dex Explorer opened successfully (Admin+ rank required)")
+    else
+        addLog("Failed to load Dex Explorer: " .. tostring(err))
+    end
+end
+
 -- Tool Teleport function (Moderator rank)
 local function loadToolTeleport()
     if not hasPermission(player, "Moderator") then
@@ -512,18 +524,6 @@ local function loadToolTeleport()
     else
         addLog("Failed to load Tool Teleport: " .. tostring(err))
         return false
-    end
-end
-
--- Dex/Explorer function (Admin rank)
-local function openDexExplorer()
-    local success, err = pcall(function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Dex-Explorer-DPP-73687"))()
-    end)
-    if success then
-        addLog("Dex Explorer opened successfully (Admin+ rank required)")
-    else
-        addLog("Failed to load Dex Explorer: " .. tostring(err))
     end
 end
 
@@ -1025,17 +1025,7 @@ player.Chatted:Connect(function(msg)
             end
             loadToolTeleport()
             commandCount = commandCount + 1
-            counterLabel.Text = tostring(commandCount)
-        
-        elseif command == "dex" or command == "explorer" then
-            if not hasPermission(player, "Admin") then
-                addLog("Permission denied: " .. player.Name .. " tried to use " .. command .. " (Required: Admin)")
-                return
-            end
-            openDexExplorer()
-            commandCount = commandCount + 1
-            counterLabel.Text = tostring(commandCount)
-            addLog(player.Name .. " [" .. getPlayerRank(player) .. "] opened Dex Explorer")
+            counterLabel.Text = tostring(commandCount)Explorer")
         
         elseif command == "antivoid" then
             if not hasPermission(player, "Admin") then
