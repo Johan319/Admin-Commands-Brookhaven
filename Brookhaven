@@ -414,7 +414,7 @@ closeButton.MouseButton1Click:Connect(function()
     commandPanel.Visible = false
 end)
 
---Bring Functions
+-- Bring Functions
 local function messyFling(target)
     if flinging then return end
     flinging = true
