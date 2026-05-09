@@ -927,7 +927,8 @@ local function showCommandsPanel()
         rankText.Position = UDim2.new(0.8, 0, 0, 0)
         rankText.BackgroundTransparency = 1
         rankText.Text = cmdInfo.rank
-        rankText.TextColor3 = cmdInfo.rank == "Admin" and Color3.fromRGB(0, 255, 100) or
+        rankText.TextColor3 = cmdInfo.rank == "Head Admin" and Color3.fromRGB(0, 150, 255) or
+                              cmdInfo.rank == "Admin" and Color3.fromRGB(0, 255, 100) or
                               cmdInfo.rank == "Moderator" and Color3.fromRGB(255, 170, 0) or
                               Color3.fromRGB(150, 150, 150)
         rankText.TextSize = 11
