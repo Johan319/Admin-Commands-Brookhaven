@@ -872,7 +872,6 @@ local function showCommandsPanel()
         {cmd = "bring <player>", desc = "Fling/bring a player to you", rank = "Head Admin", rankLevel = 80},
         {cmd = "toolteleport", desc = "Load tool teleport script", rank = "Moderator", rankLevel = 60},
         {cmd = "dex / explorer", desc = "Open Dex Explorer (exploit tool)", rank = "Admin", rankLevel = 70},
-        {cmd = "dex / explorer", desc = "Open Dex Explorer (exploit tool)", rank = "Admin", rankLevel = 70},
         {cmd = "antivoid", desc = "Load anti-void script", rank = "Admin", rankLevel = 70},
         {cmd = "antisit", desc = "Toggle anti-sit", rank = "Admin", rankLevel = 70},
         {cmd = "tp/goto/to <player>", desc = "Teleport to player", rank = "Moderator", rankLevel = 60},
@@ -1018,6 +1017,16 @@ player.Chatted:Connect(function(msg)
                 addLog("Usage: " .. prefix .. "bring <player name>")
             end
 
+        elseif command == "dex" or command == "explorer" then
+            if not hasPermission(player, "Admin") then
+                addLog("Permission denied: " .. player.Name .. " tried to use " .. command .. " (Required: Admin)")
+                return
+            end
+            openDexExplorer()
+            commandCount = commandCount + 1
+            counterLabel.Text = tostring(commandCount)
+            addLog(player.Name .. " [" .. getPlayerRank(player) .. "] opened Dex Explorer")
+
         elseif command == "toolteleport" then
             if not hasPermission(player, "Moderator") then
                 addLog("Permission denied: " .. player.Name .. " tried to use toolteleport (Required: Moderator)")
@@ -1025,8 +1034,8 @@ player.Chatted:Connect(function(msg)
             end
             loadToolTeleport()
             commandCount = commandCount + 1
-            counterLabel.Text = tostring(commandCount)Explorer")
-        
+            counterLabel.Text = tostring(commandCount)
+
         elseif command == "antivoid" then
             if not hasPermission(player, "Admin") then
                 addLog("Permission denied: " .. player.Name .. " tried to use antivoid (Required: Admin)")
