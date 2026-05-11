@@ -414,6 +414,30 @@ closeButton.MouseButton1Click:Connect(function()
     commandPanel.Visible = false
 end)
 
+-- paste addLog block here
+local commandCount = 0
+local logs = {}
+
+local function addLog(message)
+    table.insert(logs, 1, os.date("%H:%M:%S") .. " - " .. message)
+    if #logs > 30 then table.remove(logs) end
+    for _, child in pairs(logList:GetChildren()) do
+        if child:IsA("TextLabel") then child:Destroy() end
+    end
+    for i, log in ipairs(logs) do
+        local logLabel = Instance.new("TextLabel")
+        logLabel.Size = UDim2.new(1, -10, 0, 18)
+        logLabel.Position = UDim2.new(0, 5, 0, 0)
+        logLabel.Text = log
+        logLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+        logLabel.TextSize = 11
+        logLabel.TextXAlignment = Enum.TextXAlignment.Left
+        logLabel.BackgroundTransparency = 1
+        logLabel.Parent = logList
+    end
+    logList.CanvasSize = UDim2.new(0, 0, 0, #logs * 20)
+end
+
 -- Cmdbar2 GUI
 local cmdbarGui = Instance.new("ScreenGui")
 cmdbarGui.Name = "Cmdbar2Gui"
