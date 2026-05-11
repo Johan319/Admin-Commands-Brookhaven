@@ -1235,6 +1235,303 @@ player.Chatted:Connect(function(msg)
     end
 end)
 
+-- Command executor function (used by cmdbar2)
+local function executeCommand(msg)
+    if msg:sub(1, 1) == prefix then
+        local args = {}
+        for arg in msg:sub(2):gmatch("%S+") do
+            table.insert(args, arg)
+        end
+        local command = args[1] and args[1]:lower()
+        local targetName = args[2]
+
+        if command == "tp" or command == "goto" or command == "to" then
+            if not hasPermission(player, "Moderator") then
+                addLog("Permission denied: Moderator required")
+                return
+            end
+            if targetName then
+                local target = findPlayer(targetName)
+                if target then
+                    teleportTo(target, player)
+                    commandCount = commandCount + 1
+                    counterLabel.Text = tostring(commandCount)
+                else
+                    addLog("Player not found: " .. targetName)
+                end
+            end
+
+        elseif command == "view" or command == "spectate" then
+            if not hasPermission(player, "Moderator") then
+                addLog("Permission denied: Moderator required")
+                return
+            end
+            if targetName then
+                local target = findPlayer(targetName)
+                if target and target ~= player then
+                    viewPlayer(target)
+                    commandCount = commandCount + 1
+                    counterLabel.Text = tostring(commandCount)
+                end
+            end
+
+        elseif command == "bring" then
+            if not hasPermission(player, "Head Admin") then
+                addLog("Permission denied: Head Admin required")
+                return
+            end
+            if targetName then
+                local target = findPlayer(targetName)
+                if target and target ~= player then
+                    messyFling(target)
+                    commandCount = commandCount + 1
+                    counterLabel.Text = tostring(commandCount)
+                    addLog(player.Name .. " used bring on " .. target.Name)
+                end
+            end
+
+        elseif command == "dex" or command == "explorer" then
+            if not hasPermission(player, "Admin") then
+                addLog("Permission denied: Admin required")
+                return
+            end
+            openDexExplorer()
+            commandCount = commandCount + 1
+            counterLabel.Text = tostring(commandCount)
+
+        elseif command == "toolteleport" then
+            if not hasPermission(player, "Moderator") then
+                addLog("Permission denied: Moderator required")
+                return
+            end
+            loadToolTeleport()
+            commandCount = commandCount + 1
+            counterLabel.Text = tostring(commandCount)
+
+        elseif command == "antivoid" then
+            if not hasPermission(player, "Admin") then
+                addLog("Permission denied: Admin required")
+                return
+            end
+            loadAntiVoid()
+            commandCount = commandCount + 1
+            counterLabel.Text = tostring(commandCount)
+
+        elseif command == "antisit" then
+            if not hasPermission(player, "Admin") then
+                addLog("Permission denied: Admin required")
+                return
+            end
+            toggleAntiSit()
+            commandCount = commandCount + 1
+            counterLabel.Text = tostring(commandCount)
+
+        elseif command == "infjump" then
+            if not hasPermission(player, "Moderator") then
+                addLog("Permission denied: Moderator required")
+                return
+            end
+            loadInfiniteJump()
+            commandCount = commandCount + 1
+            counterLabel.Text = tostring(commandCount)
+
+        elseif command == "antifling" then
+            if not hasPermission(player, "Moderator") then
+                addLog("Permission denied: Moderator required")
+                return
+            end
+            toggleAntiFling()
+            commandCount = commandCount + 1
+            counterLabel.Text = tostring(commandCount)
+
+        elseif command == "serverinfo" or command == "info" then
+            showServerInfo()
+            commandCount = commandCount + 1
+            counterLabel.Text = tostring(commandCount)
+
+        elseif command == "prefix" then
+            if not hasPermission(player, "Moderator") then
+                addLog("Permission denied: Moderator required")
+                return
+            end
+            if targetName and #targetName == 1 then
+                prefix = targetName
+                updatePrefixDisplay()
+                addLog("Prefix changed to: " .. prefix)
+            end
+
+        elseif command == "rejoin" then
+            game:GetService("TeleportService"):Teleport(game.PlaceId)
+
+        elseif command == "reset" then
+            if player.Character then
+                player.Character:BreakJoints()
+                addLog(player.Name .. " reset their character")
+            end
+
+        elseif command == "cmds" or command == "commands" then
+            showCommandsPanel()
+            addLog(player.Name .. " viewed the commands list")
+        end
+    end
+end
+
+-- Command executor function (used by cmdbar2)
+local function executeCommand(msg)
+    if msg:sub(1, 1) == prefix then
+        local args = {}
+        for arg in msg:sub(2):gmatch("%S+") do
+            table.insert(args, arg)
+        end
+        local command = args[1] and args[1]:lower()
+        local targetName = args[2]
+
+        if command == "tp" or command == "goto" or command == "to" then
+            if not hasPermission(player, "Moderator") then
+                addLog("Permission denied: Moderator required")
+                return
+            end
+            if targetName then
+                local target = findPlayer(targetName)
+                if target then
+                    teleportTo(target, player)
+                    commandCount = commandCount + 1
+                    counterLabel.Text = tostring(commandCount)
+                else
+                    addLog("Player not found: " .. targetName)
+                end
+            end
+
+        elseif command == "view" or command == "spectate" then
+            if not hasPermission(player, "Moderator") then
+                addLog("Permission denied: Moderator required")
+                return
+            end
+            if targetName then
+                local target = findPlayer(targetName)
+                if target and target ~= player then
+                    viewPlayer(target)
+                    commandCount = commandCount + 1
+                    counterLabel.Text = tostring(commandCount)
+                end
+            end
+
+        elseif command == "bring" then
+            if not hasPermission(player, "Head Admin") then
+                addLog("Permission denied: Head Admin required")
+                return
+            end
+            if targetName then
+                local target = findPlayer(targetName)
+                if target and target ~= player then
+                    messyFling(target)
+                    commandCount = commandCount + 1
+                    counterLabel.Text = tostring(commandCount)
+                    addLog(player.Name .. " used bring on " .. target.Name)
+                end
+            end
+
+        elseif command == "dex" or command == "explorer" then
+            if not hasPermission(player, "Admin") then
+                addLog("Permission denied: Admin required")
+                return
+            end
+            openDexExplorer()
+            commandCount = commandCount + 1
+            counterLabel.Text = tostring(commandCount)
+
+        elseif command == "toolteleport" then
+            if not hasPermission(player, "Moderator") then
+                addLog("Permission denied: Moderator required")
+                return
+            end
+            loadToolTeleport()
+            commandCount = commandCount + 1
+            counterLabel.Text = tostring(commandCount)
+
+        elseif command == "antivoid" then
+            if not hasPermission(player, "Admin") then
+                addLog("Permission denied: Admin required")
+                return
+            end
+            loadAntiVoid()
+            commandCount = commandCount + 1
+            counterLabel.Text = tostring(commandCount)
+
+        elseif command == "antisit" then
+            if not hasPermission(player, "Admin") then
+                addLog("Permission denied: Admin required")
+                return
+            end
+            toggleAntiSit()
+            commandCount = commandCount + 1
+            counterLabel.Text = tostring(commandCount)
+
+        elseif command == "infjump" then
+            if not hasPermission(player, "Moderator") then
+                addLog("Permission denied: Moderator required")
+                return
+            end
+            loadInfiniteJump()
+            commandCount = commandCount + 1
+            counterLabel.Text = tostring(commandCount)
+
+        elseif command == "antifling" then
+            if not hasPermission(player, "Moderator") then
+                addLog("Permission denied: Moderator required")
+                return
+            end
+            toggleAntiFling()
+            commandCount = commandCount + 1
+            counterLabel.Text = tostring(commandCount)
+
+        elseif command == "serverinfo" or command == "info" then
+            showServerInfo()
+            commandCount = commandCount + 1
+            counterLabel.Text = tostring(commandCount)
+
+        elseif command == "prefix" then
+            if not hasPermission(player, "Moderator") then
+                addLog("Permission denied: Moderator required")
+                return
+            end
+            if targetName and #targetName == 1 then
+                prefix = targetName
+                updatePrefixDisplay()
+                addLog("Prefix changed to: " .. prefix)
+            end
+
+        elseif command == "rejoin" then
+            game:GetService("TeleportService"):Teleport(game.PlaceId)
+
+        elseif command == "reset" then
+            if player.Character then
+                player.Character:BreakJoints()
+                addLog(player.Name .. " reset their character")
+            end
+
+        elseif command == "cmds" or command == "commands" then
+            showCommandsPanel()
+            addLog(player.Name .. " viewed the commands list")
+        end
+    end
+end
+
+-- Then update your chat handler to use it
+player.Chatted:Connect(function(msg)
+    executeCommand(msg)
+end)
+
+-- And update executeCmdbarCommand to use it
+local function executeCmdbarCommand()
+    local text = cmdbarInput.Text
+    if text ~= "" then
+        addLog("Cmdbar2 executed: " .. text)
+        executeCommand(text)
+        cmdbarInput.Text = prefix
+    end
+end
+
 updateBorderColor()
 
 -- Initial setup
