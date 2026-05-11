@@ -511,12 +511,13 @@ local executeBtnCorner = Instance.new("UICorner")
 executeBtnCorner.CornerRadius = UDim.new(0, 6)
 executeBtnCorner.Parent = executeBtn
 
+-- executeCmdbarCommand (PUT IT RIGHT AFTER executeCommand)
 local function executeCmdbarCommand()
     local text = cmdbarInput.Text
     if text ~= "" then
-        player.Chatted:Fire(text)
-        cmdbarInput.Text = prefix
         addLog("Cmdbar2 executed: " .. text)
+        executeCommand(text)
+        cmdbarInput.Text = prefix
     end
 end
 
