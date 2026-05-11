@@ -414,6 +414,100 @@ closeButton.MouseButton1Click:Connect(function()
     commandPanel.Visible = false
 end)
 
+-- Cmdbar2 GUI
+local cmdbarGui = Instance.new("ScreenGui")
+cmdbarGui.Name = "Cmdbar2Gui"
+cmdbarGui.ResetOnSpawn = false
+cmdbarGui.Parent = player.PlayerGui
+
+local cmdbarFrame = Instance.new("Frame")
+cmdbarFrame.Size = UDim2.new(0, 520, 0, 90)
+cmdbarFrame.Position = UDim2.new(0.5, -260, 1, -110)
+cmdbarFrame.BackgroundColor3 = Color3.fromRGB(80, 60, 180)
+cmdbarFrame.BorderSizePixel = 0
+cmdbarFrame.Visible = false
+cmdbarFrame.Parent = cmdbarGui
+
+local cmdbarCorner = Instance.new("UICorner")
+cmdbarCorner.CornerRadius = UDim.new(0, 10)
+cmdbarCorner.Parent = cmdbarFrame
+
+local cmdbarTitle = Instance.new("TextLabel")
+cmdbarTitle.Size = UDim2.new(1, -40, 0, 35)
+cmdbarTitle.Position = UDim2.new(0, 10, 0, 0)
+cmdbarTitle.BackgroundTransparency = 1
+cmdbarTitle.Text = "Cmdbar2 [" .. getPlayerRank(player) .. "]"
+cmdbarTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+cmdbarTitle.TextSize = 18
+cmdbarTitle.Font = Enum.Font.GothamBold
+cmdbarTitle.TextXAlignment = Enum.TextXAlignment.Left
+cmdbarTitle.Parent = cmdbarFrame
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -35, 0, 3)
+closeBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.TextSize = 14
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.Parent = cmdbarFrame
+
+local closeBtnCorner = Instance.new("UICorner")
+closeBtnCorner.CornerRadius = UDim.new(0, 6)
+closeBtnCorner.Parent = closeBtn
+
+local cmdbarInput = Instance.new("TextBox")
+cmdbarInput.Size = UDim2.new(1, -130, 0, 35)
+cmdbarInput.Position = UDim2.new(0, 10, 0, 40)
+cmdbarInput.BackgroundColor3 = Color3.fromRGB(10, 10, 20)
+cmdbarInput.Text = prefix
+cmdbarInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+cmdbarInput.TextSize = 16
+cmdbarInput.Font = Enum.Font.Gotham
+cmdbarInput.TextXAlignment = Enum.TextXAlignment.Left
+cmdbarInput.ClearTextOnFocus = false
+cmdbarInput.Parent = cmdbarFrame
+
+local inputCorner = Instance.new("UICorner")
+inputCorner.CornerRadius = UDim.new(0, 6)
+inputCorner.Parent = cmdbarInput
+
+local executeBtn = Instance.new("TextButton")
+executeBtn.Size = UDim2.new(0, 110, 0, 35)
+executeBtn.Position = UDim2.new(1, -115, 0, 40)
+executeBtn.BackgroundColor3 = Color3.fromRGB(100, 80, 220)
+executeBtn.Text = "Execute"
+executeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+executeBtn.TextSize = 15
+executeBtn.Font = Enum.Font.GothamBold
+executeBtn.Parent = cmdbarFrame
+
+local executeBtnCorner = Instance.new("UICorner")
+executeBtnCorner.CornerRadius = UDim.new(0, 6)
+executeBtnCorner.Parent = executeBtn
+
+local function executeCmdbarCommand()
+    local text = cmdbarInput.Text
+    if text ~= "" then
+        player.Chatted:Fire(text)
+        cmdbarInput.Text = prefix
+        addLog("Cmdbar2 executed: " .. text)
+    end
+end
+
+executeBtn.MouseButton1Click:Connect(executeCmdbarCommand)
+
+cmdbarInput.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        executeCmdbarCommand()
+    end
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+    cmdbarFrame.Visible = false
+end)
+
 -- Bring Functions
 local function messyFling(target)
     if flinging then return end
@@ -869,6 +963,7 @@ local function showCommandsPanel()
     end
     
     local commands = {
+        {cmd = "cmdbar2", desc = "Open command bar", rank = "Moderator", rankLevel = 60},
         {cmd = "bring <player>", desc = "Fling/bring a player to you", rank = "Head Admin", rankLevel = 80},
         {cmd = "toolteleport", desc = "Load tool teleport script", rank = "Moderator", rankLevel = 60},
         {cmd = "dex / explorer", desc = "Open Dex Explorer (exploit tool)", rank = "Admin", rankLevel = 70},
@@ -993,6 +1088,14 @@ player.Chatted:Connect(function(msg)
             else
                 addLog("Usage: " .. prefix .. command .. " <player name>")
             end
+
+        elseif command == "cmdbar2" then
+            if not hasPermission(player, "Moderator") then
+                addLog("Permission denied: " .. player.Name .. " tried to use cmdbar2 (Required: Moderator)")
+                return
+            end
+            cmdbarFrame.Visible = not cmdbarFrame.Visible
+            if cmdbarFrame.Visible then cmdbarInput:CaptureFocus() end
 
         elseif command == "bring" then
             if not hasPermission(player, "Head Admin") then
