@@ -162,31 +162,6 @@ prefixLabel.Font = Enum.Font.Gotham
 prefixLabel.TextXAlignment = Enum.TextXAlignment.Left
 prefixLabel.Parent = middleSection
 
--- CENTER TITLE: Styled badge
-local titleBadge = Instance.new("Frame")
-titleBadge.Size = UDim2.new(0, 220, 0, 32)
-titleBadge.Position = UDim2.new(0.5, -110, 0.5, -16)
-titleBadge.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-titleBadge.BorderSizePixel = 0
-titleBadge.Parent = titlebar
-
-local titleBadgeCorner = Instance.new("UICorner")
-titleBadgeCorner.CornerRadius = UDim.new(0, 12)
-titleBadgeCorner.Parent = titleBadge
-
-local titleBadgeLabel = Instance.new("TextLabel")
-titleBadgeLabel.Size = UDim2.new(1, 0, 1, 0)
-titleBadgeLabel.BackgroundTransparency = 1
-titleBadgeLabel.Text = getPlayerRank(player)
-titleBadgeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleBadgeLabel.TextSize = 16
-titleBadgeLabel.Font = Enum.Font.GothamBold
-titleBadgeLabel.TextXAlignment = Enum.TextXAlignment.Center
-titleBadgeLabel.Parent = titleBadge
-
--- Middle section: Only prefix info
-local middleSection = Instance.new("Frame")
-
 -- Right section: Command counter and toggle
 local rightSection = Instance.new("Frame")
 rightSection.Size = UDim2.new(0, 120, 1, 0)
