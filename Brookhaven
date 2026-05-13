@@ -442,6 +442,295 @@ local function addLog(message)
 end
 
 -- ============================================
+-- SERVER RANKS PANEL (styled like image)
+-- ============================================
+local ranksPanel = Instance.new("Frame")
+ranksPanel.Size = UDim2.new(0, 380, 0, 500)
+ranksPanel.Position = UDim2.new(0.5, -190, 0.5, -250)
+ranksPanel.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+ranksPanel.BackgroundTransparency = 0.05
+ranksPanel.BorderSizePixel = 0
+ranksPanel.Visible = false
+ranksPanel.Parent = screenGui
+
+local ranksPanelCorner = Instance.new("UICorner")
+ranksPanelCorner.CornerRadius = UDim.new(0, 12)
+ranksPanelCorner.Parent = ranksPanel
+
+-- Purple top bar
+local ranksPanelTopBar = Instance.new("Frame")
+ranksPanelTopBar.Size = UDim2.new(1, 0, 0, 50)
+ranksPanelTopBar.Position = UDim2.new(0, 0, 0, 0)
+ranksPanelTopBar.BackgroundColor3 = Color3.fromRGB(88, 86, 214)
+ranksPanelTopBar.BorderSizePixel = 0
+ranksPanelTopBar.Parent = ranksPanel
+
+local ranksPanelTopBarCorner = Instance.new("UICorner")
+ranksPanelTopBarCorner.CornerRadius = UDim.new(0, 12)
+ranksPanelTopBarCorner.Parent = ranksPanelTopBar
+
+-- Fix sharp bottom corners of top bar
+local ranksPanelTopBarFix = Instance.new("Frame")
+ranksPanelTopBarFix.Size = UDim2.new(1, 0, 0, 12)
+ranksPanelTopBarFix.Position = UDim2.new(0, 0, 1, -12)
+ranksPanelTopBarFix.BackgroundColor3 = Color3.fromRGB(88, 86, 214)
+ranksPanelTopBarFix.BorderSizePixel = 0
+ranksPanelTopBarFix.Parent = ranksPanelTopBar
+
+-- Back arrow label
+local backLabel = Instance.new("TextLabel")
+backLabel.Size = UDim2.new(0, 40, 1, 0)
+backLabel.Position = UDim2.new(0, 10, 0, 0)
+backLabel.BackgroundTransparency = 1
+backLabel.Text = "â†"
+backLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+backLabel.TextSize = 22
+backLabel.Font = Enum.Font.GothamBold
+backLabel.Parent = ranksPanelTopBar
+
+-- Title
+local ranksPanelTitle = Instance.new("TextLabel")
+ranksPanelTitle.Size = UDim2.new(1, -120, 1, 0)
+ranksPanelTitle.Position = UDim2.new(0, 50, 0, 0)
+ranksPanelTitle.BackgroundTransparency = 1
+ranksPanelTitle.Text = "Moderation"
+ranksPanelTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+ranksPanelTitle.TextSize = 20
+ranksPanelTitle.Font = Enum.Font.GothamBold
+ranksPanelTitle.TextXAlignment = Enum.TextXAlignment.Left
+ranksPanelTitle.Parent = ranksPanelTopBar
+
+-- Minimize button
+local ranksMinBtn = Instance.new("TextButton")
+ranksMinBtn.Size = UDim2.new(0, 36, 0, 36)
+ranksMinBtn.Position = UDim2.new(1, -82, 0, 7)
+ranksMinBtn.BackgroundColor3 = Color3.fromRGB(60, 58, 160)
+ranksMinBtn.Text = "-"
+ranksMinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ranksMinBtn.TextSize = 20
+ranksMinBtn.Font = Enum.Font.GothamBold
+ranksMinBtn.Parent = ranksPanelTopBar
+
+local ranksMinCorner = Instance.new("UICorner")
+ranksMinCorner.CornerRadius = UDim.new(0, 8)
+ranksMinCorner.Parent = ranksMinBtn
+
+-- Close button
+local ranksCloseBtn = Instance.new("TextButton")
+ranksCloseBtn.Size = UDim2.new(0, 36, 0, 36)
+ranksCloseBtn.Position = UDim2.new(1, -42, 0, 7)
+ranksCloseBtn.BackgroundColor3 = Color3.fromRGB(60, 58, 160)
+ranksCloseBtn.Text = "X"
+ranksCloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ranksCloseBtn.TextSize = 16
+ranksCloseBtn.Font = Enum.Font.GothamBold
+ranksCloseBtn.Parent = ranksPanelTopBar
+
+local ranksCloseCorner = Instance.new("UICorner")
+ranksCloseCorner.CornerRadius = UDim.new(0, 8)
+ranksCloseCorner.Parent = ranksCloseBtn
+
+-- Sub-header (Ranks nav bar)
+local ranksSubBar = Instance.new("Frame")
+ranksSubBar.Size = UDim2.new(1, 0, 0, 40)
+ranksSubBar.Position = UDim2.new(0, 0, 0, 50)
+ranksSubBar.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
+ranksSubBar.BorderSizePixel = 0
+ranksSubBar.Parent = ranksPanel
+
+local leftArrow = Instance.new("TextLabel")
+leftArrow.Size = UDim2.new(0, 30, 1, 0)
+leftArrow.Position = UDim2.new(0, 5, 0, 0)
+leftArrow.BackgroundTransparency = 1
+leftArrow.Text = "â—„"
+leftArrow.TextColor3 = Color3.fromRGB(255, 255, 255)
+leftArrow.TextSize = 16
+leftArrow.Font = Enum.Font.GothamBold
+leftArrow.Parent = ranksSubBar
+
+local subBarTitle = Instance.new("TextLabel")
+subBarTitle.Size = UDim2.new(1, -60, 1, 0)
+subBarTitle.Position = UDim2.new(0, 30, 0, 0)
+subBarTitle.BackgroundTransparency = 1
+subBarTitle.Text = "Ranks"
+subBarTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+subBarTitle.TextSize = 16
+subBarTitle.Font = Enum.Font.GothamBold
+subBarTitle.TextXAlignment = Enum.TextXAlignment.Center
+subBarTitle.Parent = ranksSubBar
+
+local rightArrow = Instance.new("TextLabel")
+rightArrow.Size = UDim2.new(0, 30, 1, 0)
+rightArrow.Position = UDim2.new(1, -35, 0, 0)
+rightArrow.BackgroundTransparency = 1
+rightArrow.Text = "â–º"
+rightArrow.TextColor3 = Color3.fromRGB(255, 255, 255)
+rightArrow.TextSize = 16
+rightArrow.Font = Enum.Font.GothamBold
+rightArrow.Parent = ranksSubBar
+
+-- Scrollable ranks list
+local ranksScrollFrame = Instance.new("ScrollingFrame")
+ranksScrollFrame.Size = UDim2.new(1, 0, 1, -90)
+ranksScrollFrame.Position = UDim2.new(0, 0, 0, 90)
+ranksScrollFrame.BackgroundTransparency = 1
+ranksScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+ranksScrollFrame.ScrollBarThickness = 4
+ranksScrollFrame.Parent = ranksPanel
+
+local ranksListLayout = Instance.new("UIListLayout")
+ranksListLayout.Padding = UDim.new(0, 0)
+ranksListLayout.Parent = ranksScrollFrame
+
+ranksCloseBtn.MouseButton1Click:Connect(function()
+    ranksPanel.Visible = false
+end)
+
+ranksMinBtn.MouseButton1Click:Connect(function()
+    ranksPanel.Visible = false
+end)
+
+-- Rank display order (matches image style: level badge + name)
+local rankDisplayOrder = {
+    {rank = "Owner",      level = 5},
+    {rank = "Co-Owner",   level = 5},
+    {rank = "Head Admin", level = 4},
+    {rank = "Admin",      level = 3},
+    {rank = "Moderator",  level = 2},
+    {rank = "VIP",        level = 1},
+    {rank = "Member",     level = 0},
+}
+
+local function showServerRanksPanel()
+    for _, child in pairs(ranksScrollFrame:GetChildren()) do
+        if child:IsA("Frame") then child:Destroy() end
+    end
+
+    -- Build rank -> players map
+    local rankToPlayers = {}
+    for _, rankInfo in ipairs(rankDisplayOrder) do
+        rankToPlayers[rankInfo.rank] = {}
+    end
+    for _, plr in pairs(game.Players:GetPlayers()) do
+        local r = getPlayerRank(plr)
+        if rankToPlayers[r] then
+            table.insert(rankToPlayers[r], plr)
+        else
+            table.insert(rankToPlayers["Member"], plr)
+        end
+    end
+
+    local totalHeight = 0
+
+    for _, rankInfo in ipairs(rankDisplayOrder) do
+        local rank = rankInfo.rank
+        local level = rankInfo.level
+        local members = rankToPlayers[rank] or {}
+
+        -- Rank header row
+        local headerRow = Instance.new("Frame")
+        headerRow.Size = UDim2.new(1, 0, 0, 38)
+        headerRow.BackgroundColor3 = Color3.fromRGB(22, 22, 38)
+        headerRow.BorderSizePixel = 0
+        headerRow.Parent = ranksScrollFrame
+        totalHeight = totalHeight + 38
+
+        -- Level badge
+        local levelBadge = Instance.new("Frame")
+        levelBadge.Size = UDim2.new(0, 32, 0, 28)
+        levelBadge.Position = UDim2.new(0, 8, 0.5, -14)
+        levelBadge.BackgroundColor3 = Color3.fromRGB(40, 40, 65)
+        levelBadge.BorderSizePixel = 0
+        levelBadge.Parent = headerRow
+
+        local levelBadgeCorner = Instance.new("UICorner")
+        levelBadgeCorner.CornerRadius = UDim.new(0, 6)
+        levelBadgeCorner.Parent = levelBadge
+
+        local levelText = Instance.new("TextLabel")
+        levelText.Size = UDim2.new(1, 0, 1, 0)
+        levelText.BackgroundTransparency = 1
+        levelText.Text = tostring(level)
+        levelText.TextColor3 = Color3.fromRGB(200, 200, 200)
+        levelText.TextSize = 14
+        levelText.Font = Enum.Font.GothamBold
+        levelText.Parent = levelBadge
+
+        local rankNameLabel = Instance.new("TextLabel")
+        rankNameLabel.Size = UDim2.new(1, -55, 1, 0)
+        rankNameLabel.Position = UDim2.new(0, 48, 0, 0)
+        rankNameLabel.BackgroundTransparency = 1
+        rankNameLabel.Text = rank
+        rankNameLabel.TextColor3 = Color3.fromRGB(230, 230, 230)
+        rankNameLabel.TextSize = 15
+        rankNameLabel.Font = Enum.Font.GothamBold
+        rankNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+        rankNameLabel.Parent = headerRow
+
+        -- Member rows
+        for _, plr in ipairs(members) do
+            local memberRow = Instance.new("Frame")
+            memberRow.Size = UDim2.new(1, 0, 0, 56)
+            memberRow.BackgroundColor3 = Color3.fromRGB(32, 32, 52)
+            memberRow.BorderSizePixel = 0
+            memberRow.Parent = ranksScrollFrame
+            totalHeight = totalHeight + 56
+
+            local avatarFrame = Instance.new("Frame")
+            avatarFrame.Size = UDim2.new(0, 46, 0, 46)
+            avatarFrame.Position = UDim2.new(0, 8, 0.5, -23)
+            avatarFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+            avatarFrame.BorderSizePixel = 0
+            avatarFrame.Parent = memberRow
+
+            local avatarCorner = Instance.new("UICorner")
+            avatarCorner.CornerRadius = UDim.new(0, 10)
+            avatarCorner.Parent = avatarFrame
+
+            local avatarImg = Instance.new("ImageLabel")
+            avatarImg.Size = UDim2.new(1, 0, 1, 0)
+            avatarImg.BackgroundTransparency = 1
+            avatarImg.Image = "rbxthumb://type=AvatarHeadShot&id=" .. plr.UserId .. "&w=60&h=60"
+            avatarImg.Parent = avatarFrame
+
+            local avatarImgCorner = Instance.new("UICorner")
+            avatarImgCorner.CornerRadius = UDim.new(0, 10)
+            avatarImgCorner.Parent = avatarImg
+
+            local playerNameLabel = Instance.new("TextLabel")
+            playerNameLabel.Size = UDim2.new(1, -65, 0, 22)
+            playerNameLabel.Position = UDim2.new(0, 62, 0, 10)
+            playerNameLabel.BackgroundTransparency = 1
+            playerNameLabel.Text = plr.Name
+            playerNameLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
+            playerNameLabel.TextSize = 14
+            playerNameLabel.Font = Enum.Font.GothamBold
+            playerNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+            playerNameLabel.Parent = memberRow
+
+            local rankSubLabel = Instance.new("TextLabel")
+            rankSubLabel.Size = UDim2.new(1, -65, 0, 18)
+            rankSubLabel.Position = UDim2.new(0, 62, 0, 28)
+            rankSubLabel.BackgroundTransparency = 1
+            rankSubLabel.Text = rank
+            rankSubLabel.TextColor3 = Color3.fromRGB(150, 150, 170)
+            rankSubLabel.TextSize = 12
+            rankSubLabel.Font = Enum.Font.Gotham
+            rankSubLabel.TextXAlignment = Enum.TextXAlignment.Left
+            rankSubLabel.Parent = memberRow
+        end
+    end
+
+    ranksScrollFrame.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
+    ranksPanel.Visible = true
+
+    if logPanel.Visible then logPanel.Visible = false end
+    if commandPanel.Visible then commandPanel.Visible = false end
+
+    addLog(player.Name .. " viewed server ranks")
+end
+
+-- ============================================
 -- CMDBAR2 GUI
 -- ============================================
 local cmdbarGui = Instance.new("ScreenGui")
@@ -975,6 +1264,7 @@ local function showCommandsPanel()
     end
     
     local commands = {
+        {cmd = "serverranks",        desc = "Show group ranks panel",        rank = "Member",      rankLevel = 10},
         {cmd = "cmdbar2", desc = "Open command bar", rank = "Moderator", rankLevel = 60},
         {cmd = "bring <player>", desc = "Fling/bring a player to you", rank = "Head Admin", rankLevel = 80},
         {cmd = "toolteleport", desc = "Load tool teleport script", rank = "Moderator", rankLevel = 60},
@@ -1124,6 +1414,11 @@ local function executeCommand(msg)
         else
             addLog("Usage: " .. prefix .. "bring <player name>")
         end
+
+    elseif command == "serverranks" then
+        showServerRanksPanel()
+        commandCount = commandCount + 1
+        counterLabel.Text = tostring(commandCount)
 
     elseif command == "dex" or command == "explorer" then
         if not hasPermission(player, "Admin") then
