@@ -1378,6 +1378,7 @@ local function showCommandsPanel()
     end
     
     local commands = {
+        {cmd = "speed/walkspeed <num>", desc = "Set your walk speed", rank = "Moderator", rankLevel = 60},
         {cmd = "serverranks",        desc = "Show group ranks panel",        rank = "Member",      rankLevel = 10},
         {cmd = "cmdbar2", desc = "Open command bar", rank = "Moderator", rankLevel = 60},
         {cmd = "bring <player>", desc = "Fling/bring a player to you", rank = "Head Admin", rankLevel = 80},
@@ -1569,6 +1570,31 @@ local function executeCommand(msg)
         toggleAntiSit()
         commandCount = commandCount + 1
         counterLabel.Text = tostring(commandCount)
+
+    elseif command == "speed" or command == "walkspeed" then
+    if not hasPermission(player, "Moderator") then
+        addLog("Permission denied: Moderator required")
+        return
+    end
+    if targetName then
+        local speed = tonumber(targetName)
+        if speed then
+            local character = player.Character
+            if character then
+                local humanoid = character:FindFirstChild("Humanoid")
+                if humanoid then
+                    humanoid.WalkSpeed = speed
+                    commandCount = commandCount + 1
+                    counterLabel.Text = tostring(commandCount)
+                    addLog(player.Name .. " set WalkSpeed to " .. speed)
+                end
+            end
+        else
+            addLog("Invalid speed value: must be a number")
+        end
+    else
+        addLog("Usage: " .. prefix .. command .. " <speed>")
+    end
 
     elseif command == "infjump" then
         if not hasPermission(player, "Moderator") then
