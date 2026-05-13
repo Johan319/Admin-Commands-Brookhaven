@@ -1378,6 +1378,7 @@ local function showCommandsPanel()
     end
     
     local commands = {
+        {cmd = "jumppower/jp <num>", desc = "Set your jump power", rank = "Moderator", rankLevel = 60},
         {cmd = "speed/walkspeed <num>", desc = "Set your walk speed", rank = "Moderator", rankLevel = 60},
         {cmd = "serverranks",        desc = "Show group ranks panel",        rank = "Member",      rankLevel = 10},
         {cmd = "cmdbar2", desc = "Open command bar", rank = "Moderator", rankLevel = 60},
@@ -1543,6 +1544,24 @@ local function executeCommand(msg)
         openDexExplorer()
         commandCount = commandCount + 1
         counterLabel.Text = tostring(commandCount)
+
+    elseif command == "jumppower" or command == "jp" then
+    local power = tonumber(args[2])
+    if power then
+        local character = player.Character
+        if character then
+            local humanoid = character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.JumpPower = power
+                -- Optional: increment counter & log
+                commandCount = commandCount + 1
+                counterLabel.Text = tostring(commandCount)   -- make sure counterLabel is defined
+                addLog(player.Name .. " set JumpPower to " .. power)
+            end
+        end
+    else
+        addLog("Usage: " .. prefix .. command .. " <number>")
+    end
 
     elseif command == "toolteleport" then
         if not hasPermission(player, "Moderator") then
