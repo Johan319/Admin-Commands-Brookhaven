@@ -1624,28 +1624,17 @@ local function executeCommand(msg)
         if cmdbarFrame.Visible then cmdbarInput:CaptureFocus() end
 
     elseif command == "jumppower" or command == "jp" then
-        if not hasPermission(player, "Moderator") then
-            addLog("Permission denied: Moderator required")
-            return
-        end
-        
-        if arg2 then
-            local power = tonumber(arg2)
-            if power then
-                local character = player.Character
-                if character then
-                    local humanoid = character:FindFirstChild("Humanoid")
-                    if humanoid then
-                        humanoid.JumpPower = power
-                        commandCount = commandCount + 1
-                        counterLabel.Text = tostring(commandCount)
-                        addLog(player.Name .. " set JumpPower to " .. power)
-                    else
-                        addLog("Humanoid not found")
-                    end
+        local power = tonumber(arg2)
+        if power then
+            local character = player.Character
+            if character then
+                local humanoid = character:FindFirstChild("Humanoid")
+                if humanoid then
+                    humanoid.JumpPower = power
+                    commandCount = commandCount + 1
+                    counterLabel.Text = tostring(commandCount)
+                    addLog(player.Name .. " set JumpPower to " .. power)
                 end
-            else
-                addLog("Invalid number! Usage: " .. prefix .. command .. " <number>")
             end
         else
             addLog("Usage: " .. prefix .. command .. " <number>")
