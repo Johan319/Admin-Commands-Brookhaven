@@ -1378,6 +1378,7 @@ local function showCommandsPanel()
     end
     
     local commands = {
+        {cmd = "noclip/unnoclip", desc = "Toggle noclip on/off", rank = "Moderator", rankLevel = 60},
         {cmd = "jumppower/jp <num>", desc = "Set your jump power", rank = "Moderator", rankLevel = 60},
         {cmd = "speed/walkspeed <num>", desc = "Set your walk speed", rank = "Moderator", rankLevel = 60},
         {cmd = "serverranks",        desc = "Show group ranks panel",        rank = "Member",      rankLevel = 10},
@@ -1646,6 +1647,43 @@ local function executeCommand(msg)
         commandCount = commandCount + 1
         counterLabel.Text = tostring(commandCount)
         addLog(player.Name .. " viewed server info")
+
+    elseif command == "noclip" or command == "unnoclip" then
+    local character = player.Character
+    if not character then
+        addLog(player.Name .. " has no character")
+        return
+    end
+    
+    if command == "noclip" then
+        if noclipEnabled[player] then
+            addLog(player.Name .. " attempted noclip but it's already on")
+        else
+            for _, part in ipairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+            noclipEnabled[player] = true
+            commandCount = commandCount + 1
+            counterLabel.Text = tostring(commandCount)
+            addLog(player.Name .. " enabled noclip")
+        end
+    elseif command == "unnoclip" then
+        if not noclipEnabled[player] then
+            addLog(player.Name .. " attempted unnoclip but noclip wasn't on")
+        else
+            for _, part in ipairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+            noclipEnabled[player] = false
+            commandCount = commandCount + 1
+            counterLabel.Text = tostring(commandCount)
+            addLog(player.Name .. " disabled noclip")
+        end
+    end
 
     elseif command == "prefix" then
         if not hasPermission(player, "Moderator") then
