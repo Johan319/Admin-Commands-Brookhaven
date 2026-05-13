@@ -606,13 +606,13 @@ local function showServerRanksPanel()
         if child:IsA("Frame") then child:Destroy() end
     end
 
-    -- Build a set of currently online player names for quick lookup
+    -- Build online player lookup by username
     local onlinePlayers = {}
     for _, plr in pairs(game.Players:GetPlayers()) do
         onlinePlayers[plr.Name] = plr
     end
 
-    -- Build rank -> list of {name, onlinePlayer} from groupRanks table
+    -- Build rank -> members from groupRanks table (NOT just online players)
     local rankToMembers = {}
     for _, rankInfo in ipairs(rankDisplayOrder) do
         rankToMembers[rankInfo.rank] = {}
@@ -627,7 +627,7 @@ local function showServerRanksPanel()
         end
     end
 
-    -- Sort each rank's members: online first, then alphabetical
+    -- Sort: online first, then alphabetical
     for _, rankInfo in ipairs(rankDisplayOrder) do
         table.sort(rankToMembers[rankInfo.rank], function(a, b)
             local aOnline = a.onlinePlayer ~= nil
@@ -638,24 +638,26 @@ local function showServerRanksPanel()
     end
 
     local totalHeight = 0
+    local HEADER_H = 38   -- rank label row height
+    local MEMBER_H = 62   -- each member row height
 
     for _, rankInfo in ipairs(rankDisplayOrder) do
-        local rank = rankInfo.rank
-        local level = rankInfo.level
+        local rank   = rankInfo.rank
+        local level  = rankInfo.level
         local members = rankToMembers[rank] or {}
 
-        -- Skip ranks with no one assigned
+        -- Skip ranks nobody is assigned to
         if #members == 0 then continue end
 
-        -- Rank header row
+        -- â”€â”€ RANK HEADER ROW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         local headerRow = Instance.new("Frame")
-        headerRow.Size = UDim2.new(1, 0, 0, 38)
+        headerRow.Size = UDim2.new(1, 0, 0, HEADER_H)
         headerRow.BackgroundColor3 = Color3.fromRGB(22, 22, 38)
         headerRow.BorderSizePixel = 0
         headerRow.Parent = ranksScrollFrame
-        totalHeight = totalHeight + 38
+        totalHeight = totalHeight + HEADER_H
 
-        -- Level badge
+        -- Level number badge (left)
         local levelBadge = Instance.new("Frame")
         levelBadge.Size = UDim2.new(0, 32, 0, 28)
         levelBadge.Position = UDim2.new(0, 8, 0.5, -14)
@@ -676,10 +678,22 @@ local function showServerRanksPanel()
         levelText.Font = Enum.Font.GothamBold
         levelText.Parent = levelBadge
 
-        -- Member count badge on the right
+        -- Rank name label
+        local rankNameLabel = Instance.new("TextLabel")
+        rankNameLabel.Size = UDim2.new(0.5, 0, 1, 0)
+        rankNameLabel.Position = UDim2.new(0, 48, 0, 0)
+        rankNameLabel.BackgroundTransparency = 1
+        rankNameLabel.Text = rank
+        rankNameLabel.TextColor3 = Color3.fromRGB(230, 230, 230)
+        rankNameLabel.TextSize = 15
+        rankNameLabel.Font = Enum.Font.GothamBold
+        rankNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+        rankNameLabel.Parent = headerRow
+
+        -- Member count badge (right)
         local countBadge = Instance.new("TextLabel")
-        countBadge.Size = UDim2.new(0, 40, 0, 20)
-        countBadge.Position = UDim2.new(1, -48, 0.5, -10)
+        countBadge.Size = UDim2.new(0, 32, 0, 20)
+        countBadge.Position = UDim2.new(1, -40, 0.5, -10)
         countBadge.BackgroundColor3 = Color3.fromRGB(55, 55, 80)
         countBadge.BackgroundTransparency = 0.3
         countBadge.Text = tostring(#members)
@@ -692,96 +706,104 @@ local function showServerRanksPanel()
         countBadgeCorner.CornerRadius = UDim.new(0, 5)
         countBadgeCorner.Parent = countBadge
 
-        local rankNameLabel = Instance.new("TextLabel")
-        rankNameLabel.Size = UDim2.new(1, -100, 1, 0)
-        rankNameLabel.Position = UDim2.new(0, 48, 0, 0)
-        rankNameLabel.BackgroundTransparency = 1
-        rankNameLabel.Text = rank
-        rankNameLabel.TextColor3 = Color3.fromRGB(230, 230, 230)
-        rankNameLabel.TextSize = 15
-        rankNameLabel.Font = Enum.Font.GothamBold
-        rankNameLabel.TextXAlignment = Enum.TextXAlignment.Left
-        rankNameLabel.Parent = headerRow
-
-        -- Member rows (from groupRanks, not just online)
+        -- â”€â”€ MEMBER ROWS (one per person in this rank) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         for _, memberInfo in ipairs(members) do
-            local username = memberInfo.name
+            local username  = memberInfo.name
             local onlinePlr = memberInfo.onlinePlayer
-            local isOnline = onlinePlr ~= nil
+            local isOnline  = onlinePlr ~= nil
 
             local memberRow = Instance.new("Frame")
-            memberRow.Size = UDim2.new(1, 0, 0, 56)
-            memberRow.BackgroundColor3 = Color3.fromRGB(32, 32, 52)
+            memberRow.Size = UDim2.new(1, 0, 0, MEMBER_H)
+            memberRow.BackgroundColor3 = Color3.fromRGB(28, 28, 46)
             memberRow.BorderSizePixel = 0
             memberRow.Parent = ranksScrollFrame
-            totalHeight = totalHeight + 56
+            totalHeight = totalHeight + MEMBER_H
 
-            -- Avatar frame
+            -- Subtle alternating separator line at top
+            local divider = Instance.new("Frame")
+            divider.Size = UDim2.new(1, -16, 0, 1)
+            divider.Position = UDim2.new(0, 8, 0, 0)
+            divider.BackgroundColor3 = Color3.fromRGB(45, 45, 70)
+            divider.BorderSizePixel = 0
+            divider.Parent = memberRow
+
+            -- Avatar container (rounded square like the screenshot)
             local avatarFrame = Instance.new("Frame")
-            avatarFrame.Size = UDim2.new(0, 46, 0, 46)
-            avatarFrame.Position = UDim2.new(0, 8, 0.5, -23)
-            avatarFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+            avatarFrame.Size = UDim2.new(0, 50, 0, 50)
+            avatarFrame.Position = UDim2.new(0, 12, 0.5, -25)
+            avatarFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 68)
             avatarFrame.BorderSizePixel = 0
             avatarFrame.Parent = memberRow
 
             local avatarCorner = Instance.new("UICorner")
-            avatarCorner.CornerRadius = UDim.new(0, 10)
+            avatarCorner.CornerRadius = UDim.new(0, 12)
             avatarCorner.Parent = avatarFrame
 
+            -- Avatar image
             local avatarImg = Instance.new("ImageLabel")
             avatarImg.Size = UDim2.new(1, 0, 1, 0)
             avatarImg.BackgroundTransparency = 1
             if isOnline then
-                -- Use live avatar thumbnail
-                avatarImg.Image = "rbxthumb://type=AvatarHeadShot&id=" .. onlinePlr.UserId .. "&w=60&h=60"
+                avatarImg.Image = "rbxthumb://type=AvatarHeadShot&id=" .. onlinePlr.UserId .. "&w=100&h=100"
             else
-                -- Generic silhouette for offline
-                avatarImg.Image = "rbxassetid://6023426915"
-                avatarImg.ImageColor3 = Color3.fromRGB(100, 100, 130)
+                -- Use the username's userId via Players service if possible
+                local uid = nil
+                pcall(function()
+                    uid = game.Players:GetUserIdFromNameAsync(username)
+                end)
+                if uid then
+                    avatarImg.Image = "rbxthumb://type=AvatarHeadShot&id=" .. uid .. "&w=100&h=100"
+                    avatarImg.ImageColor3 = Color3.fromRGB(160, 160, 180) -- dimmed for offline
+                else
+                    avatarImg.Image = "rbxassetid://6023426915"
+                    avatarImg.ImageColor3 = Color3.fromRGB(100, 100, 130)
+                end
             end
             avatarImg.Parent = avatarFrame
 
             local avatarImgCorner = Instance.new("UICorner")
-            avatarImgCorner.CornerRadius = UDim.new(0, 10)
+            avatarImgCorner.CornerRadius = UDim.new(0, 12)
             avatarImgCorner.Parent = avatarImg
 
-            -- Online/offline dot indicator
+            -- Online/offline status dot (bottom-right of avatar)
             local statusDot = Instance.new("Frame")
-            statusDot.Size = UDim2.new(0, 12, 0, 12)
-            statusDot.Position = UDim2.new(1, -3, 1, -3)
+            statusDot.Size = UDim2.new(0, 13, 0, 13)
+            statusDot.Position = UDim2.new(1, -4, 1, -4)
             statusDot.BackgroundColor3 = isOnline
                 and Color3.fromRGB(0, 210, 100)
-                or  Color3.fromRGB(120, 120, 140)
-            statusDot.BorderSizePixel = 0
+                or  Color3.fromRGB(100, 100, 120)
+            statusDot.BorderSizePixel = 2
+            statusDot.BorderColor3 = Color3.fromRGB(28, 28, 46)
+            statusDot.ZIndex = 2
             statusDot.Parent = avatarFrame
 
             local dotCorner = Instance.new("UICorner")
             dotCorner.CornerRadius = UDim.new(1, 0)
             dotCorner.Parent = statusDot
 
-            -- Player name
+            -- Username
             local playerNameLabel = Instance.new("TextLabel")
-            playerNameLabel.Size = UDim2.new(1, -65, 0, 22)
-            playerNameLabel.Position = UDim2.new(0, 62, 0, 10)
+            playerNameLabel.Size = UDim2.new(1, -75, 0, 24)
+            playerNameLabel.Position = UDim2.new(0, 70, 0, 11)
             playerNameLabel.BackgroundTransparency = 1
             playerNameLabel.Text = username
             playerNameLabel.TextColor3 = isOnline
                 and Color3.fromRGB(240, 240, 240)
-                or  Color3.fromRGB(140, 140, 160)
-            playerNameLabel.TextSize = 14
+                or  Color3.fromRGB(130, 130, 150)
+            playerNameLabel.TextSize = 15
             playerNameLabel.Font = Enum.Font.GothamBold
             playerNameLabel.TextXAlignment = Enum.TextXAlignment.Left
             playerNameLabel.Parent = memberRow
 
-            -- Rank + online status subtitle
+            -- Rank â€¢ Online/Offline subtitle
             local rankSubLabel = Instance.new("TextLabel")
-            rankSubLabel.Size = UDim2.new(1, -65, 0, 18)
-            rankSubLabel.Position = UDim2.new(0, 62, 0, 28)
+            rankSubLabel.Size = UDim2.new(1, -75, 0, 18)
+            rankSubLabel.Position = UDim2.new(0, 70, 0, 33)
             rankSubLabel.BackgroundTransparency = 1
-            rankSubLabel.Text = rank .. " â€¢ " .. (isOnline and "Online" or "Offline")
+            rankSubLabel.Text = rank .. "  â€¢  " .. (isOnline and "Online" or "Offline")
             rankSubLabel.TextColor3 = isOnline
-                and Color3.fromRGB(0, 200, 90)
-                or  Color3.fromRGB(120, 120, 140)
+                and Color3.fromRGB(0, 195, 85)
+                or  Color3.fromRGB(110, 110, 130)
             rankSubLabel.TextSize = 12
             rankSubLabel.Font = Enum.Font.Gotham
             rankSubLabel.TextXAlignment = Enum.TextXAlignment.Left
