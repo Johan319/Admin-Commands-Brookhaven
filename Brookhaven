@@ -1546,21 +1546,28 @@ local function executeCommand(msg)
         counterLabel.Text = tostring(commandCount)
 
     elseif command == "jumppower" or command == "jp" then
-    local power = tonumber(args[2])
-    if power then
-        local character = player.Character
-        if character then
-            local humanoid = character:FindFirstChild("Humanoid")
-            if humanoid then
-                humanoid.JumpPower = power
-                -- Optional: increment counter & log
-                commandCount = commandCount + 1
-                counterLabel.Text = tostring(commandCount)   -- make sure counterLabel is defined
-                addLog(player.Name .. " set JumpPower to " .. power)
+    if not hasPermission(player, "Moderator") then
+        addLog("Permission denied: Moderator required")
+        return
+    end
+    if targetName then
+        local power = tonumber(targetName)
+        if power then
+            local character = player.Character
+            if character then
+                local humanoid = character:FindFirstChild("Humanoid")
+                if humanoid then
+                    humanoid.JumpPower = power
+                    commandCount = commandCount + 1
+                    counterLabel.Text = tostring(commandCount)
+                    addLog(player.Name .. " set JumpPower to " .. power)
+                end
             end
+        else
+            addLog("Invalid jump power value: must be a number")
         end
     else
-        addLog("Usage: " .. prefix .. command .. " <number>")
+        addLog("Usage: " .. prefix .. command .. " <power>")
     end
 
     elseif command == "toolteleport" then
