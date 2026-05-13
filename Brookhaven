@@ -11,7 +11,7 @@ local player = game.Players.LocalPlayer
 -- Rank hierarchy: Owner > Co-Owner > Head Admin > Admin > Moderator > VIP > Member
 -- ============================================
 local groupRanks = {
-    ["Johan"] = "Owner",
+    ["johnCyrusPlana3"] = "Owner",
     ["sigmaboy2341814"] = "Co-Owner",
     ["ojw0ma03"] = "Co-Owner",
     ["PlayerName2"] = "Head Admin",
