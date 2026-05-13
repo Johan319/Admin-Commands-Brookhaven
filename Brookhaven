@@ -445,8 +445,8 @@ end
 -- SERVER RANKS PANEL (styled like image)
 -- ============================================
 local ranksPanel = Instance.new("Frame")
-ranksPanel.Size = UDim2.new(0, 380, 0, 500)
-ranksPanel.Position = UDim2.new(0.5, -190, 0.5, -250)
+ranksPanel.Size = UDim2.new(0, 300, 0, 400)
+ranksPanel.Position = UDim2.new(0.5, -150, 0.5, -200)
 ranksPanel.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
 ranksPanel.BackgroundTransparency = 0.05
 ranksPanel.BorderSizePixel = 0
@@ -601,6 +601,36 @@ local rankDisplayOrder = {
     {rank = "Member",     level = 0},
 }
 
+-- UserId cache so avatars always load (even for offline players)
+local userIdCache = {}
+
+local function getUserId(username)
+    -- Check online players first (instant, no API call)
+    for _, plr in pairs(game.Players:GetPlayers()) do
+        if plr.Name == username then
+            userIdCache[username] = plr.UserId
+            return plr.UserId
+        end
+    end
+    if userIdCache[username] then
+        return userIdCache[username]
+    end
+    local uid = nil
+    pcall(function()
+        uid = game.Players:GetUserIdFromNameAsync(username)
+    end)
+    if uid then userIdCache[username] = uid end
+    return uid
+end
+
+-- Pre-cache all ranked usernames in background on load
+task.spawn(function()
+    for username, _ in pairs(groupRanks) do
+        getUserId(username)
+        task.wait(0.2)
+    end
+end)
+
 local function showServerRanksPanel()
     for _, child in pairs(ranksScrollFrame:GetChildren()) do
         if child:IsA("Frame") then child:Destroy() end
@@ -739,25 +769,19 @@ local function showServerRanksPanel()
             avatarCorner.CornerRadius = UDim.new(0, 12)
             avatarCorner.Parent = avatarFrame
 
-            -- Avatar image
+            -- Avatar image (uses cache so Owner + all ranks always show correctly)
             local avatarImg = Instance.new("ImageLabel")
             avatarImg.Size = UDim2.new(1, 0, 1, 0)
             avatarImg.BackgroundTransparency = 1
-            if isOnline then
-                avatarImg.Image = "rbxthumb://type=AvatarHeadShot&id=" .. onlinePlr.UserId .. "&w=100&h=100"
-            else
-                -- Use the username's userId via Players service if possible
-                local uid = nil
-                pcall(function()
-                    uid = game.Players:GetUserIdFromNameAsync(username)
-                end)
-                if uid then
-                    avatarImg.Image = "rbxthumb://type=AvatarHeadShot&id=" .. uid .. "&w=100&h=100"
-                    avatarImg.ImageColor3 = Color3.fromRGB(160, 160, 180) -- dimmed for offline
-                else
-                    avatarImg.Image = "rbxassetid://6023426915"
-                    avatarImg.ImageColor3 = Color3.fromRGB(100, 100, 130)
+            local uid = getUserId(username)
+            if uid then
+                avatarImg.Image = "rbxthumb://type=AvatarHeadShot&id=" .. uid .. "&w=100&h=100"
+                if not isOnline then
+                    avatarImg.ImageColor3 = Color3.fromRGB(150, 150, 170) -- dimmed for offline
                 end
+            else
+                avatarImg.Image = "rbxassetid://6023426915"
+                avatarImg.ImageColor3 = Color3.fromRGB(100, 100, 130)
             end
             avatarImg.Parent = avatarFrame
 
