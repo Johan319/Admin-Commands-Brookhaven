@@ -1378,6 +1378,7 @@ local function showCommandsPanel()
     end
     
     local commands = {
+        {cmd = "jumppower/jp <num>", desc = "Set your jump power", rank = "Moderator", rankLevel = 60},
         {cmd = "speed/walkspeed <num>", desc = "Set your walk speed", rank = "Moderator", rankLevel = 60},
         {cmd = "serverranks",        desc = "Show group ranks panel",        rank = "Member",      rankLevel = 10},
         {cmd = "cmdbar2", desc = "Open command bar", rank = "Moderator", rankLevel = 60},
@@ -1621,6 +1622,34 @@ local function executeCommand(msg)
         end
         cmdbarFrame.Visible = not cmdbarFrame.Visible
         if cmdbarFrame.Visible then cmdbarInput:CaptureFocus() end
+
+    elseif command == "jumppower" or command == "jp" then
+        if not hasPermission(player, "Moderator") then
+            addLog("Permission denied: Moderator required")
+            return
+        end
+        
+        if arg2 then
+            local power = tonumber(arg2)
+            if power then
+                local character = player.Character
+                if character then
+                    local humanoid = character:FindFirstChild("Humanoid")
+                    if humanoid then
+                        humanoid.JumpPower = power
+                        commandCount = commandCount + 1
+                        counterLabel.Text = tostring(commandCount)
+                        addLog(player.Name .. " set JumpPower to " .. power)
+                    else
+                        addLog("Humanoid not found")
+                    end
+                end
+            else
+                addLog("Invalid number! Usage: " .. prefix .. command .. " <number>")
+            end
+        else
+            addLog("Usage: " .. prefix .. command .. " <number>")
+        end
 
     elseif command == "serverinfo" or command == "info" then
         showServerInfo()
