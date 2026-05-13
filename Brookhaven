@@ -12,7 +12,8 @@ local player = game.Players.LocalPlayer
 -- ============================================
 local groupRanks = {
     ["Johan"] = "Owner",
-    ["sigmaboy2341814,ojw0ma03"] = "Co-Owner",
+    ["sigmaboy2341814"] = "Co-Owner",
+    ["ojw0ma03"] = "Co-Owner",
     ["PlayerName2"] = "Head Admin",
     ["PlayerName3"] = "Admin",
     ["PlayerName4"] = "Moderator",
