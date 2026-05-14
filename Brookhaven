@@ -1050,6 +1050,159 @@ local function showServerInfo()
     end
 end
 
+-- ============================================
+-- JAIL COMMAND (Admin+)
+-- ============================================
+local voidX = -1156.0
+local voidY = -12.8
+local voidZ = 392.6
+
+local function jailPlayer(targetPlayer)
+    if not hasPermission(player, "Admin") then
+        addLog("Permission denied: Admin+ required for jail")
+        return false
+    end
+
+    if targetPlayer == player then
+        addLog("You cannot jail yourself!")
+        return false
+    end
+
+    local jogadores = game:GetService("Players")
+    local rep = game:GetService("ReplicatedStorage")
+    local loop = game:GetService("RunService")
+    local mundo = game:GetService("Workspace")
+
+    local eu = jogadores.LocalPlayer
+    local loopTP = nil
+    local sofaEquipado = false
+    local base = nil
+    local posInicial = nil
+    local raiz = nil
+    local nomeAlvo = targetPlayer.Name
+
+    local function limparSofa()
+        if loopTP then
+            loopTP:Disconnect()
+            loopTP = nil
+        end
+        if sofaEquipado then
+            local boneco = eu.Character
+            if boneco then
+                local sofa = boneco:FindFirstChild("Couch")
+                if sofa then
+                    sofa.Parent = eu.Backpack
+                    sofaEquipado = false
+                end
+            end
+        end
+        if base then
+            base:Destroy()
+            base = nil
+        end
+        if getgenv().AntiSit then
+            getgenv().AntiSit:Set(false)
+        end
+        local humano = eu.Character and eu.Character:FindFirstChildOfClass("Humanoid")
+        if humano then
+            humano:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
+            humano:ChangeState(Enum.HumanoidStateType.GettingUp)
+        end
+        if posInicial and raiz then
+            raiz.CFrame = posInicial
+            posInicial = nil
+        end
+    end
+
+    local function pegarSofa()
+        local boneco = eu.Character
+        if not boneco then return end
+        local mochila = eu.Backpack
+        if not mochila:FindFirstChild("Couch") and not boneco:FindFirstChild("Couch") then
+            local args2 = { "PickingTools", "Couch" }
+            rep.RE["1Too1l"]:InvokeServer(unpack(args2))
+            task.wait(0.1)
+        end
+        local sofa = mochila:FindFirstChild("Couch") or boneco:FindFirstChild("Couch")
+        if sofa then
+            sofa.Parent = boneco
+            sofaEquipado = true
+        end
+    end
+
+    local function posAleatoriaAbaixo(boneco)
+        local rp = boneco:FindFirstChild("HumanoidRootPart")
+        if not rp then return Vector3.new() end
+        local offset = Vector3.new(math.random(-2, 2), -5.1, math.random(-2, 2))
+        return rp.Position + offset
+    end
+
+    local function tpAbaixo(alvo)
+        if not alvo or not alvo.Character or not alvo.Character:FindFirstChild("HumanoidRootPart") then return end
+        local meuBoneco = eu.Character
+        local minhaRaiz = meuBoneco and meuBoneco:FindFirstChild("HumanoidRootPart")
+        local humano = meuBoneco and meuBoneco:FindFirstChildOfClass("Humanoid")
+        if not minhaRaiz or not humano then return end
+
+        humano:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
+        if not base then
+            base = Instance.new("Part")
+            base.Size = Vector3.new(10, 1, 10)
+            base.Anchored = true
+            base.CanCollide = true
+            base.Transparency = 0.5
+            base.Parent = mundo
+        end
+        local destino = posAleatoriaAbaixo(alvo.Character)
+        base.Position = destino
+        minhaRaiz.CFrame = CFrame.new(destino)
+        humano:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
+    end
+
+    -- Start Jail
+    local boneco = eu.Character
+    if not boneco then
+        addLog("Your character not found")
+        return false
+    end
+
+    posInicial = boneco:FindFirstChild("HumanoidRootPart") and boneco.HumanoidRootPart.CFrame
+    raiz = boneco:FindFirstChild("HumanoidRootPart")
+    pegarSofa()
+
+    loopTP = loop.Heartbeat:Connect(function()
+        local alvoAtual = jogadores:FindFirstChild(nomeAlvo)
+        if not alvoAtual or not alvoAtual.Character or not alvoAtual.Character:FindFirstChild("Humanoid") then
+            limparSofa()
+            return
+        end
+        if getgenv().AntiSit then getgenv().AntiSit:Set(true) end
+        tpAbaixo(alvoAtual)
+    end)
+
+    task.spawn(function()
+        local alvoAtual = jogadores:FindFirstChild(nomeAlvo)
+        while alvoAtual and alvoAtual.Character and alvoAtual.Character:FindFirstChild("Humanoid") do
+            task.wait(0.05)
+            if alvoAtual.Character.Humanoid.SeatPart then
+                local buraco = CFrame.new(voidX, voidY, voidZ)
+                alvoAtual.Character.HumanoidRootPart.CFrame = buraco
+                eu.Character.HumanoidRootPart.CFrame = buraco
+                task.wait(0.4)
+                limparSofa()
+                task.wait(0.2)
+                if posInicial then
+                    eu.Character.HumanoidRootPart.CFrame = posInicial
+                end
+                break
+            end
+        end
+    end)
+
+    addLog(player.Name .. " [" .. getPlayerRank(player) .. "] jailed " .. targetPlayer.Name)
+    return true
+end
+
 -- copy avatar funstions
 local function copyAvatar(targetPlayer)
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -1967,6 +2120,7 @@ local function showCommandsPanel()
     end
     
     local commands = {
+        {cmd = "jail <player>", desc = "Jail player to void (couch method)", rank = "Admin", rankLevel = 70},
         {cmd = "kill <player>", desc = "Kill a player using couch method", rank = "Moderator", rankLevel = 60},
         {cmd = "copy <player>", desc = "Copy a player's avatar", rank = "Staff", rankLevel = 50},
         {cmd = "loopkill <player>",   desc = "Continuously kill a player", rank = "Head Admin", rankLevel = 80},
@@ -2402,6 +2556,20 @@ elseif command == "unskybox" then
         commandCount = commandCount + 1
         counterLabel.Text = tostring(commandCount)
         addLog(player.Name .. " viewed server info")
+
+    elseif command == "jail" then
+        if targetName then
+            local target = findPlayer(targetName)
+            if target then
+                jailPlayer(target)
+                commandCount = commandCount + 1
+                counterLabel.Text = tostring(commandCount)
+            else
+                addLog("Player not found: " .. targetName)
+            end
+        else
+            addLog("Usage: " .. prefix .. "jail <player>")
+        end
 
     elseif command == "prefix" then
         if not hasPermission(player, "Moderator") then
