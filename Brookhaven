@@ -17,7 +17,7 @@ local groupRanks = {
     ["PlayerName2"] = "Head Admin",
     ["johngamermasterplana"] = "Admin",
     ["PlayerName4"] = "Moderator",
-    ["PlayerName5"] = "VIP",
+    ["PlayerName5"] = "Staff",
 }
 
 -- Rank permission levels (higher number = more permissions)
@@ -27,7 +27,7 @@ local rankLevels = {
     ["Head Admin"] = 80,
     ["Admin"] = 70,
     ["Moderator"] = 60,
-    ["VIP"] = 50,
+    ["Staff"] = 50,
     ["Member"] = 10,
 }
 
@@ -104,6 +104,8 @@ local function updateBorderColor()
         topBorder.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
     elseif yourRank == "Moderator" then
         topBorder.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+    elseif yourRank == "Staff" then
+        topBorder.BackgroundColor3 = Color3.fromRGB(180, 100, 255)
     else
         topBorder.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
     end
@@ -597,7 +599,7 @@ local rankDisplayOrder = {
     {rank = "Head Admin", level = 4},
     {rank = "Admin",      level = 3},
     {rank = "Moderator",  level = 2},
-    {rank = "VIP",        level = 1},
+    {rank = "Staff",        level = 1},
     {rank = "Member",     level = 0},
 }
 
