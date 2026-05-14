@@ -1687,120 +1687,6 @@ local function killPlayer(targetPlayer)
     addLog(player.Name .. " used kill on: " .. nomeAlvo)
 end
 
--- ============================================
--- SKYBOX NUKE FUNCTIONS (Head Admin)
--- ============================================
-local skyboxEnabled = false
-local skyboxTrack = nil
-local rigidTrack = nil
-local savedNukeBody = {}
-
-local function stopAllAnimations()
-    if rigidTrack then
-        pcall(function() rigidTrack:Stop(); rigidTrack:Destroy() end)
-        rigidTrack = nil
-    end
-    if skyboxTrack then
-        pcall(function() skyboxTrack:Stop(); skyboxTrack:Destroy() end)
-        skyboxTrack = nil
-    end
-
-    local character = player.Character
-    if character then
-        local humanoid = character:FindFirstChild("Humanoid")
-        if humanoid and humanoid:FindFirstChild("Animator") then
-            for _, track in pairs(humanoid.Animator:GetPlayingAnimationTracks()) do
-                if track.Animation then
-                    local animId = track.Animation.AnimationId
-                    if animId == "rbxassetid://70883871260184" or animId == "rbxassetid://3695333486" then
-                        pcall(function() track:Stop() end)
-                    end
-                end
-            end
-        end
-    end
-end
-
-local function restoreBody()
-    if next(savedNukeBody) then
-        local character = player.Character
-        if character then
-            local humanoid = character:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                pcall(function()
-                    game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer({
-                        [1] = savedNukeBody.Torso,
-                        [2] = savedNukeBody.RightArm,
-                        [3] = savedNukeBody.LeftArm,
-                        [4] = savedNukeBody.RightLeg,
-                        [5] = savedNukeBody.LeftLeg,
-                        [6] = savedNukeBody.Head
-                    })
-                end)
-                savedNukeBody = {}
-            end
-        end
-    end
-end
-
-local function enableSkybox()
-    if skyboxEnabled then
-        addLog("Skybox Nuke is already active")
-        return
-    end
-    
-    skyboxEnabled = true
-    local character = player.Character
-    if not character then return end
-    
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if not humanoid then return end
-
-    local description = humanoid:GetAppliedDescription()
-    savedNukeBody = {
-        Torso = description.Torso, RightArm = description.RightArm,
-        LeftArm = description.LeftArm, RightLeg = description.RightLeg,
-        LeftLeg = description.LeftLeg, Head = description.Head
-    }
-
-    task.wait(0.2)
-    pcall(function()
-        game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer({
-            [1] = 123402086843885, [2] = 100839513065432,
-            [3] = 78300682916056,  [4] = 86276701020724,
-            [5] = 78409653958165,  [6] = 15093053680
-        })
-    end)
-
-    task.wait(0.3)
-    local newAnim = Instance.new("Animation")
-    newAnim.AnimationId = "rbxassetid://70883871260184"
-    skyboxTrack = humanoid:LoadAnimation(newAnim)
-    skyboxTrack.Priority = Enum.AnimationPriority.Action4
-    skyboxTrack:Play(0.1, 1, 0.01)
-
-    task.wait(0.5)
-    local plankAnim = Instance.new("Animation")
-    plankAnim.AnimationId = "rbxassetid://3695333486"
-    rigidTrack = humanoid:LoadAnimation(plankAnim)
-    rigidTrack.Priority = Enum.AnimationPriority.Movement
-    rigidTrack:Play(0.1, 1, 0)
-
-    addLog("Skybox Nuke ENABLED")
-end
-
-local function disableSkybox()
-    if not skyboxEnabled then
-        addLog("Skybox Nuke is not active")
-        return
-    end
-    skyboxEnabled = false
-    stopAllAnimations()
-    task.wait(0.2)
-    restoreBody()
-    addLog("Skybox Nuke DISABLED")
-end
-
 -- AntiFling functions (YOUR ORIGINAL)
 local function enableAntiFling()
     if antiFlingActive then
@@ -2234,8 +2120,6 @@ local function showCommandsPanel()
     end
     
     local commands = {
-        {cmd = "skyboxnuke",   desc = "Enable Skybox Nuke", rank = "Head Admin", rankLevel = 80},
-        {cmd = "unskyboxnuke", desc = "Disable Skybox Nuke", rank = "Head Admin", rankLevel = 80},
         {cmd = "jail <player>", desc = "Jail player to void (couch method)", rank = "Admin", rankLevel = 70},
         {cmd = "kill <player>", desc = "Kill a player using couch method", rank = "Moderator", rankLevel = 60},
         {cmd = "copy <player>", desc = "Copy a player's avatar", rank = "Staff", rankLevel = 50},
@@ -2474,24 +2358,6 @@ elseif command == "unloopkill" then
         else
             addLog("Usage: " .. prefix .. "bring <player name>")
         end
-
-    elseif command == "skyboxnuke" then
-        if not hasPermission(player, "Head Admin") then
-            addLog("Permission denied: Head Admin required")
-            return
-        end
-        enableSkybox()
-        commandCount = commandCount + 1
-        counterLabel.Text = tostring(commandCount)
-
-    elseif command == "unskyboxnuke" then
-        if not hasPermission(player, "Head Admin") then
-            addLog("Permission denied: Head Admin required")
-            return
-        end
-        disableSkybox()
-        commandCount = commandCount + 1
-        counterLabel.Text = tostring(commandCount)
 
     elseif command == "serverranks" then
         showServerRanksPanel()
