@@ -1050,6 +1050,236 @@ local function showServerInfo()
     end
 end
 
+-- loopkill funstions
+local activeLoopKills = {}
+
+local function startLoopKill(targetPlayer)
+    local nomeAlvo = targetPlayer.Name
+
+    if activeLoopKills[nomeAlvo] then
+        addLog("Already loopkilling: " .. nomeAlvo)
+        return
+    end
+
+    local jogadores = game:GetService("Players")
+    local rep = game:GetService("ReplicatedStorage")
+    local loop = game:GetService("RunService")
+    local mundo = game:GetService("Workspace")
+
+    local eu = jogadores.LocalPlayer
+    local loopTP = nil
+    local sofaEquipado = false
+    local base = nil
+    local posInicial = nil
+    local raiz = nil
+
+    local killData = {
+        running = true,
+        loopTP = nil,
+        cleanup = nil,
+    }
+
+    local function limparSofaCiclo()
+        if loopTP then
+            loopTP:Disconnect()
+            loopTP = nil
+        end
+        if sofaEquipado then
+            local boneco = eu.Character
+            if boneco then
+                local sofa = boneco:FindFirstChild("Couch")
+                if sofa then
+                    sofa.Parent = eu.Backpack
+                    sofaEquipado = false
+                end
+            end
+        end
+        if base then
+            base:Destroy()
+            base = nil
+        end
+        if getgenv().AntiSit then
+            getgenv().AntiSit:Set(false)
+        end
+        local humano = eu.Character and eu.Character:FindFirstChildOfClass("Humanoid")
+        if humano then
+            humano:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
+            humano:ChangeState(Enum.HumanoidStateType.GettingUp)
+        end
+    end
+
+    local function limparSofa()
+        limparSofaCiclo()
+        if posInicial then
+            local ch = eu.Character
+            local root = ch and ch:FindFirstChild("HumanoidRootPart")
+            if root then
+                root.CFrame = posInicial
+            end
+            posInicial = nil
+        end
+    end
+
+    killData.cleanup = limparSofa
+
+    local function pegarSofa()
+        local boneco = eu.Character
+        if not boneco then return end
+        local mochila = eu.Backpack
+        if not mochila:FindFirstChild("Couch") and not boneco:FindFirstChild("Couch") then
+            local args2 = { "PickingTools", "Couch" }
+            rep.RE["1Too1l"]:InvokeServer(unpack(args2))
+            task.wait(0.1)
+        end
+        local sofa = mochila:FindFirstChild("Couch") or boneco:FindFirstChild("Couch")
+        if sofa then
+            sofa.Parent = boneco
+            sofaEquipado = true
+        end
+    end
+
+    local function posAleatoriaAbaixo(boneco)
+        local rp = boneco:FindFirstChild("HumanoidRootPart")
+        if not rp then return Vector3.new() end
+        local offset = Vector3.new(math.random(-2, 2), -5.1, math.random(-2, 2))
+        return rp.Position + offset
+    end
+
+    local function tpAbaixo(alvo)
+        if not alvo or not alvo.Character or not alvo.Character:FindFirstChild("HumanoidRootPart") then return end
+        local meuBoneco = eu.Character
+        local minhaRaiz = meuBoneco and meuBoneco:FindFirstChild("HumanoidRootPart")
+        local humano = meuBoneco and meuBoneco:FindFirstChildOfClass("Humanoid")
+        if not minhaRaiz or not humano then return end
+        humano:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
+        if not base then
+            base = Instance.new("Part")
+            base.Size = Vector3.new(10, 1, 10)
+            base.Anchored = true
+            base.CanCollide = true
+            base.Transparency = 0.5
+            base.Parent = mundo
+        end
+        local destino = posAleatoriaAbaixo(alvo.Character)
+        base.Position = destino
+        minhaRaiz.CFrame = CFrame.new(destino)
+        humano:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
+    end
+
+    local boneco = eu.Character
+    if not boneco then
+        addLog("Your character not found")
+        return
+    end
+
+    local rootAtStart = boneco:FindFirstChild("HumanoidRootPart")
+    if rootAtStart then
+        posInicial = rootAtStart.CFrame
+    end
+    raiz = rootAtStart
+    pegarSofa()
+
+    loopTP = loop.Heartbeat:Connect(function()
+        if not killData.running then return end
+        local alvoAtual = jogadores:FindFirstChild(nomeAlvo)
+        if not alvoAtual or not alvoAtual.Character or not alvoAtual.Character:FindFirstChild("Humanoid") then return end
+        if getgenv().AntiSit then getgenv().AntiSit:Set(true) end
+        tpAbaixo(alvoAtual)
+    end)
+
+    killData.loopTP = loopTP
+
+    task.spawn(function()
+        while killData.running do
+            local alvoAtual = jogadores:FindFirstChild(nomeAlvo)
+            if not alvoAtual then
+                task.wait(1)
+                local found = false
+                for _, p in pairs(jogadores:GetPlayers()) do
+                    if p.Name == nomeAlvo then found = true break end
+                end
+                if not found then task.wait(3) end
+                task.wait(0.1)
+            elseif not alvoAtual.Character then
+                task.wait(0.2)
+            else
+                local hum = alvoAtual.Character:FindFirstChild("Humanoid")
+                if not hum then task.wait(0.1) end
+                task.wait(0.05)
+                alvoAtual = jogadores:FindFirstChild(nomeAlvo)
+                if alvoAtual and alvoAtual.Character and alvoAtual.Character:FindFirstChild("Humanoid") then
+                    if alvoAtual.Character.Humanoid.SeatPart then
+                        local buraco = CFrame.new(265.46, -450.83, -59.93)
+                        alvoAtual.Character.HumanoidRootPart.CFrame = buraco
+                        eu.Character.HumanoidRootPart.CFrame = buraco
+                        task.wait(0.4)
+                        limparSofaCiclo()
+                        task.wait(0.3)
+                        if posInicial and eu.Character and eu.Character:FindFirstChild("HumanoidRootPart") then
+                            eu.Character.HumanoidRootPart.CFrame = posInicial
+                        end
+                        task.wait(1.5)
+                        if killData.running then
+                            sofaEquipado = false
+                            base = nil
+                            pegarSofa()
+                            if loopTP then loopTP:Disconnect() end
+                            loopTP = loop.Heartbeat:Connect(function()
+                                if not killData.running then return end
+                                local a = jogadores:FindFirstChild(nomeAlvo)
+                                if not a or not a.Character or not a.Character:FindFirstChild("Humanoid") then return end
+                                if getgenv().AntiSit then getgenv().AntiSit:Set(true) end
+                                tpAbaixo(a)
+                            end)
+                            killData.loopTP = loopTP
+                        end
+                    end
+                end
+                task.wait(0.05)
+            end
+        end
+        limparSofa()
+        addLog("Loop kill stopped on: " .. nomeAlvo)
+    end)
+
+    activeLoopKills[nomeAlvo] = killData
+    addLog(player.Name .. " started loopkill on: " .. nomeAlvo)
+end
+
+local function stopLoopKill(searchName)
+    local foundKey = nil
+    local s = searchName:lower()
+    for name, _ in pairs(activeLoopKills) do
+        if name:lower() == s or name:lower():find(s, 1, true) then
+            foundKey = name
+            break
+        end
+    end
+    if not foundKey then
+        addLog("No active loop kill found for: " .. searchName)
+        return
+    end
+    local killData = activeLoopKills[foundKey]
+    killData.running = false
+    if killData.loopTP then
+        killData.loopTP:Disconnect()
+        killData.loopTP = nil
+    end
+    if killData.cleanup then killData.cleanup() end
+    activeLoopKills[foundKey] = nil
+    addLog(player.Name .. " stopped loopkill on: " .. foundKey)
+end
+
+local function stopAllLoopKills()
+    for name, data in pairs(activeLoopKills) do
+        data.running = false
+        if data.loopTP then data.loopTP:Disconnect() end
+        if data.cleanup then data.cleanup() end
+        activeLoopKills[name] = nil
+        addLog("Unloop kill (all): " .. name)
+    end
+end
+
 -- AntiFling functions (YOUR ORIGINAL)
 local function enableAntiFling()
     if antiFlingActive then
@@ -1483,6 +1713,8 @@ local function showCommandsPanel()
     end
     
     local commands = {
+        {cmd = "loopkill <player>",   desc = "Continuously kill a player", rank = "Head Admin", rankLevel = 80},
+        {cmd = "unloopkill <player>", desc = "Stop loopkilling a player",  rank = "Head Admin", rankLevel = 80},
         {cmd = "skybox",   desc = "Enable skybox animation",  rank = "Co-Owner", rankLevel = 90},
         {cmd = "unskybox", desc = "Disable skybox animation", rank = "Co-Owner", rankLevel = 90},
         {cmd = "spin",   desc = "Start spinning your character", rank = "Staff", rankLevel = 50},
@@ -1597,6 +1829,43 @@ local function executeCommand(msg)
         else
             addLog("Usage: " .. prefix .. command .. " <player name>")
         end
+
+    elseif command == "loopkill" then
+    if not hasPermission(player, "Head Admin") then
+        addLog("Permission denied: Head Admin required")
+        return
+    end
+    if targetName then
+        local target = findPlayer(targetName)
+        if target then
+            if target == player then
+                addLog("You cannot loopkill yourself!")
+            else
+                startLoopKill(target)
+                commandCount = commandCount + 1
+                counterLabel.Text = tostring(commandCount)
+            end
+        else
+            addLog("Player not found: " .. targetName)
+        end
+    else
+        addLog("Usage: " .. prefix .. "loopkill <player name>")
+    end
+
+elseif command == "unloopkill" then
+    if not hasPermission(player, "Head Admin") then
+        addLog("Permission denied: Head Admin required")
+        return
+    end
+    if targetName then
+        stopLoopKill(targetName)
+        commandCount = commandCount + 1
+        counterLabel.Text = tostring(commandCount)
+    else
+        stopAllLoopKills()
+        commandCount = commandCount + 1
+        counterLabel.Text = tostring(commandCount)
+    end
 
     elseif command == "spin" or command == "unspin" then
     if not hasPermission(player, "Staff") then
