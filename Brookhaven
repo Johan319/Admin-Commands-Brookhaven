@@ -2337,6 +2337,35 @@ elseif command == "unskybox" then
         addLog("Permission denied: Moderator required")
         return
     end
+    if targetName then
+        local target = findPlayer(targetName)
+        if target then
+            if target == player then
+                addLog("You cannot kill yourself!")
+            else
+                killPlayer(target)
+                commandCount = commandCount + 1
+                counterLabel.Text = tostring(commandCount)
+            end
+        else
+            -- Try joining remaining args for names with spaces
+            local fullName = msg:sub(#prefix + #command + 2)
+            local target2 = findPlayer(fullName)
+            if target2 then
+                if target2 == player then
+                    addLog("You cannot kill yourself!")
+                else
+                    killPlayer(target2)
+                    commandCount = commandCount + 1
+                    counterLabel.Text = tostring(commandCount)
+                end
+            else
+                addLog("Player not found: " .. targetName)
+            end
+        end
+    else
+        addLog("Usage: " .. prefix .. "kill <player name>")
+    end
 
     elseif command == "copy" then
     if not hasPermission(player, "Staff") then
