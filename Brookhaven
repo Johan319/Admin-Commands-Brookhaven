@@ -1378,6 +1378,8 @@ local function showCommandsPanel()
     end
     
     local commands = {
+        {cmd = "spin",   desc = "Start spinning your character", rank = "Staff", rankLevel = 50},
+        {cmd = "unspin", desc = "Stop spinning your character",  rank = "Staff", rankLevel = 50},
         {cmd = "jumppower/jp <num>", desc = "Set your jump power", rank = "Moderator", rankLevel = 60},
         {cmd = "speed/walkspeed <num>", desc = "Set your walk speed", rank = "Moderator", rankLevel = 60},
         {cmd = "serverranks",        desc = "Show group ranks panel",        rank = "Member",      rankLevel = 10},
@@ -1442,9 +1444,10 @@ local function showCommandsPanel()
         rankText.BackgroundTransparency = 1
         rankText.Text = cmdInfo.rank
         rankText.TextColor3 = cmdInfo.rank == "Head Admin" and Color3.fromRGB(0, 150, 255) or
-                              cmdInfo.rank == "Admin" and Color3.fromRGB(0, 255, 100) or
-                              cmdInfo.rank == "Moderator" and Color3.fromRGB(255, 170, 0) or
-                              Color3.fromRGB(150, 150, 150)
+                      cmdInfo.rank == "Admin" and Color3.fromRGB(0, 255, 100) or
+                      cmdInfo.rank == "Moderator" and Color3.fromRGB(255, 170, 0) or
+                      cmdInfo.rank == "Staff" and Color3.fromRGB(180, 100, 255) or
+                      Color3.fromRGB(150, 150, 150)
         rankText.TextSize = 11
         rankText.Font = Enum.Font.GothamBold
         rankText.TextXAlignment = Enum.TextXAlignment.Center
@@ -1485,6 +1488,43 @@ local function executeCommand(msg)
         else
             addLog("Usage: " .. prefix .. command .. " <player name>")
         end
+
+    elseif command == "spin" or command == "unspin" then
+    if not hasPermission(player, "Staff") then
+        addLog("Permission denied: Staff required")
+        return
+    end
+    local character = player.Character
+    if character then
+        local humanoid = character:FindFirstChild("Humanoid")
+        local hrp = character:FindFirstChild("HumanoidRootPart")
+        if hrp and humanoid then
+            if command == "spin" then
+                if hrp:FindFirstChild("SpinBodyVelocity") then
+                    addLog("Spin is already active")
+                    return
+                end
+                local bav = Instance.new("BodyAngularVelocity")
+                bav.Name = "SpinBodyVelocity"
+                bav.AngularVelocity = Vector3.new(0, 50, 0)
+                bav.MaxTorque = Vector3.new(0, math.huge, 0)
+                bav.Parent = hrp
+                commandCount = commandCount + 1
+                counterLabel.Text = tostring(commandCount)
+                addLog(player.Name .. " started spinning")
+            elseif command == "unspin" then
+                local bav = hrp:FindFirstChild("SpinBodyVelocity")
+                if bav then
+                    bav:Destroy()
+                    commandCount = commandCount + 1
+                    counterLabel.Text = tostring(commandCount)
+                    addLog(player.Name .. " stopped spinning")
+                else
+                    addLog("Spin is not active")
+                end
+            end
+        end
+    end
 
     elseif command == "view" or command == "spectate" then
         if not hasPermission(player, "Moderator") then
