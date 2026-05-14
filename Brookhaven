@@ -1050,6 +1050,124 @@ local function showServerInfo()
     end
 end
 
+-- copy avatar funstions
+local function copyAvatar(targetPlayer)
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+
+    local LChar = player.Character
+    local TPlayer = targetPlayer
+
+    if not TPlayer or not TPlayer.Character then
+        addLog("Cannot copy: Target has no character")
+        return
+    end
+
+    local LHumanoid = LChar and LChar:FindFirstChildOfClass("Humanoid")
+    local THumanoid = TPlayer.Character:FindFirstChildOfClass("Humanoid")
+
+    if not LHumanoid or not THumanoid then
+        addLog("Cannot copy: Humanoid not found")
+        return
+    end
+
+    -- RESET LOCALPLAYER
+    local LDesc = LHumanoid:GetAppliedDescription()
+
+    for _, acc in ipairs(LDesc:GetAccessories(true)) do
+        if acc.AssetId and tonumber(acc.AssetId) then
+            Remotes.Wear:InvokeServer(tonumber(acc.AssetId))
+            task.wait(0.2)
+        end
+    end
+
+    if tonumber(LDesc.Shirt) then
+        Remotes.Wear:InvokeServer(tonumber(LDesc.Shirt))
+        task.wait(0.2)
+    end
+
+    if tonumber(LDesc.Pants) then
+        Remotes.Wear:InvokeServer(tonumber(LDesc.Pants))
+        task.wait(0.2)
+    end
+
+    if tonumber(LDesc.Face) then
+        Remotes.Wear:InvokeServer(tonumber(LDesc.Face))
+        task.wait(0.2)
+    end
+
+    -- COPY FROM TARGET
+    local PDesc = THumanoid:GetAppliedDescription()
+
+    local argsBody = {
+        [1] = {
+            [1] = PDesc.Torso,
+            [2] = PDesc.RightArm,
+            [3] = PDesc.LeftArm,
+            [4] = PDesc.RightLeg,
+            [5] = PDesc.LeftLeg,
+            [6] = PDesc.Head
+        }
+    }
+    Remotes.ChangeCharacterBody:InvokeServer(unpack(argsBody))
+    task.wait(0.5)
+
+    if tonumber(PDesc.Shirt) then
+        Remotes.Wear:InvokeServer(tonumber(PDesc.Shirt))
+        task.wait(0.3)
+    end
+
+    if tonumber(PDesc.Pants) then
+        Remotes.Wear:InvokeServer(tonumber(PDesc.Pants))
+        task.wait(0.3)
+    end
+
+    if tonumber(PDesc.Face) then
+        Remotes.Wear:InvokeServer(tonumber(PDesc.Face))
+        task.wait(0.3)
+    end
+
+    for _, v in ipairs(PDesc:GetAccessories(true)) do
+        if v.AssetId and tonumber(v.AssetId) then
+            Remotes.Wear:InvokeServer(tonumber(v.AssetId))
+            task.wait(0.3)
+        end
+    end
+
+    local SkinColor = TPlayer.Character:FindFirstChild("Body Colors")
+    if SkinColor then
+        Remotes.ChangeBodyColor:FireServer(tostring(SkinColor.HeadColor))
+        task.wait(0.3)
+    end
+
+    if tonumber(PDesc.IdleAnimation) then
+        Remotes.Wear:InvokeServer(tonumber(PDesc.IdleAnimation))
+        task.wait(0.3)
+    end
+
+    local Bag = TPlayer:FindFirstChild("PlayersBag")
+    if Bag then
+        if Bag:FindFirstChild("RPName") and Bag.RPName.Value ~= "" then
+            Remotes.RPNameText:FireServer("RolePlayName", Bag.RPName.Value)
+            task.wait(0.3)
+        end
+        if Bag:FindFirstChild("RPBio") and Bag.RPBio.Value ~= "" then
+            Remotes.RPNameText:FireServer("RolePlayBio", Bag.RPBio.Value)
+            task.wait(0.3)
+        end
+        if Bag:FindFirstChild("RPNameColor") then
+            Remotes.RPNameColor:FireServer("PickingRPNameColor", Bag.RPNameColor.Value)
+            task.wait(0.3)
+        end
+        if Bag:FindFirstChild("RPBioColor") then
+            Remotes.RPNameColor:FireServer("PickingRPBioColor", Bag.RPBioColor.Value)
+            task.wait(0.3)
+        end
+    end
+
+    addLog(player.Name .. " copied avatar from: " .. TPlayer.Name)
+end
+
 -- loopkill funstions
 local activeLoopKills = {}
 
@@ -1713,6 +1831,7 @@ local function showCommandsPanel()
     end
     
     local commands = {
+        {cmd = "copy <player>", desc = "Copy a player's avatar", rank = "Staff", rankLevel = 50},
         {cmd = "loopkill <player>",   desc = "Continuously kill a player", rank = "Head Admin", rankLevel = 80},
         {cmd = "unloopkill <player>", desc = "Stop loopkilling a player",  rank = "Head Admin", rankLevel = 80},
         {cmd = "skybox",   desc = "Enable skybox animation",  rank = "Co-Owner", rankLevel = 90},
@@ -2075,6 +2194,28 @@ elseif command == "unskybox" then
         toggleAntiFling()
         commandCount = commandCount + 1
         counterLabel.Text = tostring(commandCount)
+
+    elseif command == "copy" then
+    if not hasPermission(player, "Staff") then
+        addLog("Permission denied: Staff required")
+        return
+    end
+    if targetName then
+        local target = findPlayer(targetName)
+        if target then
+            if target == player then
+                addLog("You cannot copy yourself!")
+            else
+                copyAvatar(target)
+                commandCount = commandCount + 1
+                counterLabel.Text = tostring(commandCount)
+            end
+        else
+            addLog("Player not found: " .. targetName)
+        end
+    else
+        addLog("Usage: " .. prefix .. "copy <player name>")
+    end
 
     elseif command == "cmdbar2" then
         if not hasPermission(player, "Moderator") then
