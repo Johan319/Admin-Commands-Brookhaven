@@ -2020,6 +2020,7 @@ local function enableSkyboxNuke()
         Head     = description.Head
     }
     task.wait(0.2)
+    -- 6 DIFFERENT IDs, this is what makes it different from regular skybox
     pcall(function()
         game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer({
             [1] = 123402086843885,
