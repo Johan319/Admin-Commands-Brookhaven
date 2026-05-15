@@ -1840,8 +1840,9 @@ end
 local function viewPlayer(targetPlayer)
     return startSpectating(targetPlayer)
 end
-
--- skybox with skyboxnuke
+-- ==========================
+-- SKYBOX WITH SKYBOXNUKE FUNTIONS
+-- ==========================
 local skyboxEnabled = false
 local skyboxTrack = nil
 local rigidTrack = nil
@@ -1953,6 +1954,7 @@ local function disableSkybox()
     stopAllAnimations()
     task.wait(0.2)
     restoreBody()
+    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ResetCharacterAppearance"):FireServer()
     addLog(player.Name .. " disabled Skybox")
 end
 
@@ -2062,6 +2064,7 @@ local function disableSkyboxNuke()
     stopAllAnimationsNuke()
     task.wait(0.2)
     restoreBodyNuke()
+    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ResetCharacterAppearance"):FireServer()
     addLog(player.Name .. " disabled Skybox Nuke")
 end
 
