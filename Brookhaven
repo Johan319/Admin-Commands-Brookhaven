@@ -588,8 +588,26 @@ ranksCloseBtn.MouseButton1Click:Connect(function()
     ranksPanel.Visible = false
 end)
 
+-- Replace this block (lines 591-593):
 ranksMinBtn.MouseButton1Click:Connect(function()
     ranksPanel.Visible = false
+end)
+
+-- With this:
+local ranksPanelMinimized = false
+ranksMinBtn.MouseButton1Click:Connect(function()
+    ranksPanelMinimized = not ranksPanelMinimized
+    if ranksPanelMinimized then
+        ranksScrollFrame.Visible = false
+        ranksSubBar.Visible = false
+        ranksPanel.Size = UDim2.new(0, 300, 0, 50)  -- shrink to just the top bar
+        ranksMinBtn.Text = "+"
+    else
+        ranksScrollFrame.Visible = true
+        ranksSubBar.Visible = true
+        ranksPanel.Size = UDim2.new(0, 300, 0, 400)  -- restore full size
+        ranksMinBtn.Text = "-"
+    end
 end)
 
 -- Rank display order (matches image style: level badge + name)
