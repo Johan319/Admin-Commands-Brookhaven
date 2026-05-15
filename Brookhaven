@@ -1841,13 +1841,16 @@ local function viewPlayer(targetPlayer)
     return startSpectating(targetPlayer)
 end
 
--- ============================================
--- SKYBOX FUNCTIONS
--- ============================================
+-- skybox with skyboxnuke
 local skyboxEnabled = false
 local skyboxTrack = nil
 local rigidTrack = nil
 local savedNukeBody = {}
+
+local skyboxNukeEnabled = false
+local skyboxNukeTrack = nil
+local rigidNukeTrack = nil
+local savedNukeBodyNuke = {}
 
 local function stopAllAnimations()
     if rigidTrack then
@@ -1952,14 +1955,6 @@ local function disableSkybox()
     restoreBody()
     addLog(player.Name .. " disabled Skybox")
 end
-
--- ============================================
--- SKYBOX NUKE FUNCTIONS
--- ============================================
-local skyboxNukeEnabled = false
-local skyboxNukeTrack = nil
-local rigidNukeTrack = nil
-local savedNukeBodyNuke = {}
 
 local function stopAllAnimationsNuke()
     if rigidNukeTrack then
