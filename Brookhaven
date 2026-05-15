@@ -1944,7 +1944,7 @@ local function disableSkybox()
     addLog(player.Name .. " disabled Skybox")
 end
 
--- skyboxnuke funtions
+-- skyboxnuke
 local skyboxNukeEnabled = false
 local skyboxNukeTrack = nil
 local rigidNukeTrack = nil
