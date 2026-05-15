@@ -1841,7 +1841,14 @@ local function viewPlayer(targetPlayer)
     return startSpectating(targetPlayer)
 end
 
--- skybox funtions
+-- ============================================
+-- SKYBOX FUNCTIONS
+-- ============================================
+local skyboxEnabled = false
+local skyboxTrack = nil
+local rigidTrack = nil
+local savedNukeBody = {}
+
 local function stopAllAnimations()
     if rigidTrack then
         pcall(function() rigidTrack:Stop(); rigidTrack:Destroy() end)
@@ -1861,7 +1868,9 @@ local function stopAllAnimations()
                     if track.Animation then
                         local animId = track.Animation.AnimationId
                         if animId == "rbxassetid://70883871260184" or animId == "rbxassetid://3695333486" then
-                            pcall(function() track:Stop() end)
+                            if track ~= skyboxNukeTrack and track ~= rigidNukeTrack then
+                                pcall(function() track:Stop() end)
+                            end
                         end
                     end
                 end
@@ -1944,7 +1953,9 @@ local function disableSkybox()
     addLog(player.Name .. " disabled Skybox")
 end
 
--- skyboxnuke
+-- ============================================
+-- SKYBOX NUKE FUNCTIONS
+-- ============================================
 local skyboxNukeEnabled = false
 local skyboxNukeTrack = nil
 local rigidNukeTrack = nil
@@ -1969,7 +1980,9 @@ local function stopAllAnimationsNuke()
                     if track.Animation then
                         local animId = track.Animation.AnimationId
                         if animId == "rbxassetid://70883871260184" or animId == "rbxassetid://3695333486" then
-                            pcall(function() track:Stop() end)
+                            if track ~= skyboxTrack and track ~= rigidTrack then
+                                pcall(function() track:Stop() end)
+                            end
                         end
                     end
                 end
@@ -2020,7 +2033,6 @@ local function enableSkyboxNuke()
         Head     = description.Head
     }
     task.wait(0.2)
-    -- 6 DIFFERENT IDs, this is what makes it different from regular skybox
     pcall(function()
         game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer({
             [1] = 123402086843885,
