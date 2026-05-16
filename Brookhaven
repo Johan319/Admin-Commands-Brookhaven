@@ -1979,6 +1979,7 @@ local flySpeed = 50
 local flyMinimized = false
 local flyBv, flyBg = nil, nil
 local startFly, stopFly
+
 local TweenService = game:GetService("TweenService")
 
 local flySg = Instance.new("ScreenGui")
@@ -2117,18 +2118,6 @@ flySpeedBox.Font = Enum.Font.GothamBold
 flySpeedBox.TextXAlignment = Enum.TextXAlignment.Right
 flySpeedBox.Parent = flySpeedRow
 
-local function getFlyJoystick()
-    local ok, result = pcall(function()
-        local pm = player.PlayerScripts:FindFirstChild("PlayerModule")
-        if pm then
-            local cm = pm:FindFirstChild("ControlModule")
-            if cm then return require(cm):GetMoveVector() end
-        end
-        return Vector3.new(0,0,0)
-    end)
-    return ok and result or Vector3.new(0,0,0)
-end
-
 startFly = function()
     if flying then return end
     local char = player.Character
@@ -2189,8 +2178,19 @@ end)
 
 flyCloseBtn.MouseButton1Click:Connect(function()
     stopFly()
-    flyFrame.Visible = false
 end)
+
+local function getFlyJoystick()
+    local ok, result = pcall(function()
+        local pm = player.PlayerScripts:FindFirstChild("PlayerModule")
+        if pm then
+            local cm = pm:FindFirstChild("ControlModule")
+            if cm then return require(cm):GetMoveVector() end
+        end
+        return Vector3.new(0,0,0)
+    end)
+    return ok and result or Vector3.new(0,0,0)
+end
 
 game:GetService("RunService").RenderStepped:Connect(function()
     if not flying or not flyBv then return end
