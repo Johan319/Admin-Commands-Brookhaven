@@ -2978,13 +2978,6 @@ rightSectionButton.MouseButton1Click:Connect(function()
 end)
 
 -- ============================================
--- EVENT CONNECTIONS
--- ============================================
-player.CharacterAdded:Connect(function(character)
-    if isSpectating then stopSpectating() end
-end)
-
--- ============================================
 -- STARTUP
 -- ============================================
 updateBorderColor()
