@@ -1972,7 +1972,7 @@ local function toggleAntiFling()
 end
 
 -- ==========================
--- FLY+GUI FUNTIONS
+-- FLY+GUI FUNCTIONS
 -- ==========================
 local flying = false
 local flySpeed = 50
