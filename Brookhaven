@@ -594,7 +594,16 @@ local function buildMembersPage()
     local HEADER_H = 38
     local MEMBER_H = 62
     local rankToOnline = {}
-    for _, rankInfo in ipairs(rankDisplayOrder) do
+    local memberRankOrder = {
+        {rank = "Owner", level = 5},
+        {rank = "Co-Owner", level = 5},
+        {rank = "Head Admin", level = 4},
+        {rank = "Admin", level = 3},
+        {rank = "Moderator", level = 2},
+        {rank = "Staff", level = 1},
+        {rank = "Member", level = 0},
+    }
+    for _, rankInfo in ipairs(memberRankOrder) do
         rankToOnline[rankInfo.rank] = {}
     end
     for _, plr in pairs(game.Players:GetPlayers()) do
@@ -602,7 +611,7 @@ local function buildMembersPage()
         if not rankToOnline[rank] then rankToOnline[rank] = {} end
         table.insert(rankToOnline[rank], plr)
     end
-    for _, rankInfo in ipairs(rankDisplayOrder) do
+    for _, rankInfo in ipairs(memberRankOrder) do
         local rank = rankInfo.rank
         local level = rankInfo.level
         local members = rankToOnline[rank] or {}
