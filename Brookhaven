@@ -619,7 +619,7 @@ local function buildMembersPage()
             rankLabel.Size = UDim2.new(1, -75, 0, 18)
             rankLabel.Position = UDim2.new(0, 70, 0, 33)
             rankLabel.BackgroundTransparency = 1
-            rankLabel.Text = "Member  *  Online (Auto)"
+            rankLabel.Text = (groupRanks[plr.Name] or "Member") .. "  *  Online (Auto)"
             rankLabel.TextColor3 = Color3.fromRGB(0, 195, 85)
             rankLabel.TextSize = 12
             rankLabel.Font = Enum.Font.Gotham
