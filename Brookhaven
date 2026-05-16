@@ -585,6 +585,50 @@ local ranksListLayout = Instance.new("UIListLayout")
 ranksListLayout.Padding = UDim.new(0, 0)
 ranksListLayout.Parent = ranksScrollFrame
 
+local function buildMembersPage()
+    for _, child in pairs(ranksScrollFrame:GetChildren()) do
+        if child:IsA("Frame") then child:Destroy() end
+    end
+    for _, plr in pairs(game.Players:GetPlayers()) do
+        if not groupRanks[plr.Name] then
+            local memberRow = Instance.new("Frame")
+            memberRow.Size = UDim2.new(1, 0, 0, 62)
+            memberRow.BackgroundColor3 = Color3.fromRGB(28, 28, 46)
+            memberRow.BorderSizePixel = 0
+            memberRow.Parent = ranksScrollFrame
+
+            local avatarImg = Instance.new("ImageLabel")
+            avatarImg.Size = UDim2.new(0, 50, 0, 50)
+            avatarImg.Position = UDim2.new(0, 12, 0.5, -25)
+            avatarImg.BackgroundTransparency = 1
+            avatarImg.Image = "rbxthumb://type=AvatarHeadShot&id=" .. plr.UserId .. "&w=100&h=100"
+            avatarImg.Parent = memberRow
+
+            local nameLabel = Instance.new("TextLabel")
+            nameLabel.Size = UDim2.new(1, -75, 0, 24)
+            nameLabel.Position = UDim2.new(0, 70, 0, 11)
+            nameLabel.BackgroundTransparency = 1
+            nameLabel.Text = plr.Name
+            nameLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
+            nameLabel.TextSize = 15
+            nameLabel.Font = Enum.Font.GothamBold
+            nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+            nameLabel.Parent = memberRow
+
+            local rankLabel = Instance.new("TextLabel")
+            rankLabel.Size = UDim2.new(1, -75, 0, 18)
+            rankLabel.Position = UDim2.new(0, 70, 0, 33)
+            rankLabel.BackgroundTransparency = 1
+            rankLabel.Text = "Member  *  Online (Auto)"
+            rankLabel.TextColor3 = Color3.fromRGB(0, 195, 85)
+            rankLabel.TextSize = 12
+            rankLabel.Font = Enum.Font.Gotham
+            rankLabel.TextXAlignment = Enum.TextXAlignment.Left
+            rankLabel.Parent = memberRow
+        end
+    end
+end
+
 ranksCloseBtn.MouseButton1Click:Connect(function()
     ranksPanel.Visible = false
 end)
