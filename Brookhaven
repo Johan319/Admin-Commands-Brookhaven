@@ -2302,11 +2302,6 @@ local function toggleAntiSit()
     end
 end
 
--- Stop spectate button
-stopSpectateButton.MouseButton1Click:Connect(function()
-    stopSpectating()
-end)
-
 -- Handle character respawn
 player.CharacterAdded:Connect(function(character)
     if isSpectating then
@@ -2991,13 +2986,6 @@ end)
 
 player.CharacterAdded:Connect(function(character)
     if isSpectating then stopSpectating() end
-end)
-
-game.Players.PlayerRemoving:Connect(function(leavingPlayer)
-    if isSpectating and currentSpectateTarget == leavingPlayer then
-        addLog("Spectate target left the game!")
-        stopSpectating()
-    end
 end)
 
 -- ============================================
