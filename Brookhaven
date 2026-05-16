@@ -589,21 +589,111 @@ local function buildMembersPage()
     for _, child in pairs(ranksScrollFrame:GetChildren()) do
         if child:IsA("Frame") then child:Destroy() end
     end
+    ranksScrollFrame.CanvasPosition = Vector2.new(0, 0)
+    local totalHeight = 0
+    local HEADER_H = 38
+    local MEMBER_H = 62
+    local rankToOnline = {}
+    for _, rankInfo in ipairs(rankDisplayOrder) do
+        rankToOnline[rankInfo.rank] = {}
+    end
     for _, plr in pairs(game.Players:GetPlayers()) do
-        if not groupRanks[plr.Name] then
+        local rank = groupRanks[plr.Name] or "Member"
+        if not rankToOnline[rank] then rankToOnline[rank] = {} end
+        table.insert(rankToOnline[rank], plr)
+    end
+    for _, rankInfo in ipairs(rankDisplayOrder) do
+        local rank = rankInfo.rank
+        local level = rankInfo.level
+        local members = rankToOnline[rank] or {}
+        if #members == 0 then continue end
+        local headerRow = Instance.new("Frame")
+        headerRow.Size = UDim2.new(1, 0, 0, HEADER_H)
+        headerRow.BackgroundColor3 = Color3.fromRGB(22, 22, 38)
+        headerRow.BorderSizePixel = 0
+        headerRow.Parent = ranksScrollFrame
+        totalHeight = totalHeight + HEADER_H
+        local levelBadge = Instance.new("Frame")
+        levelBadge.Size = UDim2.new(0, 32, 0, 28)
+        levelBadge.Position = UDim2.new(0, 8, 0.5, -14)
+        levelBadge.BackgroundColor3 = Color3.fromRGB(40, 40, 65)
+        levelBadge.BorderSizePixel = 0
+        levelBadge.Parent = headerRow
+        local levelBadgeCorner = Instance.new("UICorner")
+        levelBadgeCorner.CornerRadius = UDim.new(0, 6)
+        levelBadgeCorner.Parent = levelBadge
+        local levelText = Instance.new("TextLabel")
+        levelText.Size = UDim2.new(1, 0, 1, 0)
+        levelText.BackgroundTransparency = 1
+        levelText.Text = tostring(level)
+        levelText.TextColor3 = Color3.fromRGB(200, 200, 200)
+        levelText.TextSize = 14
+        levelText.Font = Enum.Font.GothamBold
+        levelText.Parent = levelBadge
+        local rankNameLabel = Instance.new("TextLabel")
+        rankNameLabel.Size = UDim2.new(0.5, 0, 1, 0)
+        rankNameLabel.Position = UDim2.new(0, 48, 0, 0)
+        rankNameLabel.BackgroundTransparency = 1
+        rankNameLabel.Text = rank
+        rankNameLabel.TextColor3 = Color3.fromRGB(230, 230, 230)
+        rankNameLabel.TextSize = 15
+        rankNameLabel.Font = Enum.Font.GothamBold
+        rankNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+        rankNameLabel.Parent = headerRow
+        local countBadge = Instance.new("TextLabel")
+        countBadge.Size = UDim2.new(0, 32, 0, 20)
+        countBadge.Position = UDim2.new(1, -40, 0.5, -10)
+        countBadge.BackgroundColor3 = Color3.fromRGB(55, 55, 80)
+        countBadge.BackgroundTransparency = 0.3
+        countBadge.Text = tostring(#members)
+        countBadge.TextColor3 = Color3.fromRGB(180, 180, 200)
+        countBadge.TextSize = 12
+        countBadge.Font = Enum.Font.GothamBold
+        countBadge.Parent = headerRow
+        local countCorner = Instance.new("UICorner")
+        countCorner.CornerRadius = UDim.new(0, 5)
+        countCorner.Parent = countBadge
+        for _, plr in pairs(members) do
             local memberRow = Instance.new("Frame")
-            memberRow.Size = UDim2.new(1, 0, 0, 62)
+            memberRow.Size = UDim2.new(1, 0, 0, MEMBER_H)
             memberRow.BackgroundColor3 = Color3.fromRGB(28, 28, 46)
             memberRow.BorderSizePixel = 0
             memberRow.Parent = ranksScrollFrame
-
+            totalHeight = totalHeight + MEMBER_H
+            local divider = Instance.new("Frame")
+            divider.Size = UDim2.new(1, -16, 0, 1)
+            divider.Position = UDim2.new(0, 8, 0, 0)
+            divider.BackgroundColor3 = Color3.fromRGB(45, 45, 70)
+            divider.BorderSizePixel = 0
+            divider.Parent = memberRow
+            local avatarFrame = Instance.new("Frame")
+            avatarFrame.Size = UDim2.new(0, 50, 0, 50)
+            avatarFrame.Position = UDim2.new(0, 12, 0.5, -25)
+            avatarFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 68)
+            avatarFrame.BorderSizePixel = 0
+            avatarFrame.Parent = memberRow
+            local avatarCorner = Instance.new("UICorner")
+            avatarCorner.CornerRadius = UDim.new(0, 12)
+            avatarCorner.Parent = avatarFrame
             local avatarImg = Instance.new("ImageLabel")
-            avatarImg.Size = UDim2.new(0, 50, 0, 50)
-            avatarImg.Position = UDim2.new(0, 12, 0.5, -25)
+            avatarImg.Size = UDim2.new(1, 0, 1, 0)
             avatarImg.BackgroundTransparency = 1
             avatarImg.Image = "rbxthumb://type=AvatarHeadShot&id=" .. plr.UserId .. "&w=100&h=100"
-            avatarImg.Parent = memberRow
-
+            avatarImg.Parent = avatarFrame
+            local avatarImgCorner = Instance.new("UICorner")
+            avatarImgCorner.CornerRadius = UDim.new(0, 12)
+            avatarImgCorner.Parent = avatarImg
+            local statusDot = Instance.new("Frame")
+            statusDot.Size = UDim2.new(0, 13, 0, 13)
+            statusDot.Position = UDim2.new(1, -4, 1, -4)
+            statusDot.BackgroundColor3 = Color3.fromRGB(0, 210, 100)
+            statusDot.BorderSizePixel = 2
+            statusDot.BorderColor3 = Color3.fromRGB(28, 28, 46)
+            statusDot.ZIndex = 2
+            statusDot.Parent = avatarFrame
+            local dotCorner = Instance.new("UICorner")
+            dotCorner.CornerRadius = UDim.new(1, 0)
+            dotCorner.Parent = statusDot
             local nameLabel = Instance.new("TextLabel")
             nameLabel.Size = UDim2.new(1, -75, 0, 24)
             nameLabel.Position = UDim2.new(0, 70, 0, 11)
@@ -614,12 +704,11 @@ local function buildMembersPage()
             nameLabel.Font = Enum.Font.GothamBold
             nameLabel.TextXAlignment = Enum.TextXAlignment.Left
             nameLabel.Parent = memberRow
-
             local rankLabel = Instance.new("TextLabel")
             rankLabel.Size = UDim2.new(1, -75, 0, 18)
             rankLabel.Position = UDim2.new(0, 70, 0, 33)
             rankLabel.BackgroundTransparency = 1
-            rankLabel.Text = (groupRanks[plr.Name] or "Member") .. "  *  Online (Auto)"
+            rankLabel.Text = rank .. "  *  Online"
             rankLabel.TextColor3 = Color3.fromRGB(0, 195, 85)
             rankLabel.TextSize = 12
             rankLabel.Font = Enum.Font.Gotham
@@ -627,6 +716,7 @@ local function buildMembersPage()
             rankLabel.Parent = memberRow
         end
     end
+    ranksScrollFrame.CanvasSize = UDim2.new(0, 0, 0, totalHeight + 10)
 end
 
 ranksCloseBtn.MouseButton1Click:Connect(function()
