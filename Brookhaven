@@ -502,27 +502,12 @@ ranksPanelTitle.Font = Enum.Font.GothamBold
 ranksPanelTitle.TextXAlignment = Enum.TextXAlignment.Left
 ranksPanelTitle.Parent = ranksPanelTopBar
 
--- Minimize button
-local ranksMinBtn = Instance.new("TextButton")
-ranksMinBtn.Size = UDim2.new(0, 36, 0, 36)
-ranksMinBtn.Position = UDim2.new(1, -82, 0, 7)
-ranksMinBtn.BackgroundColor3 = Color3.fromRGB(60, 58, 160)
-ranksMinBtn.Text = "-"
-ranksMinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ranksMinBtn.TextSize = 20
-ranksMinBtn.Font = Enum.Font.GothamBold
-ranksMinBtn.Parent = ranksPanelTopBar
-
-local ranksMinCorner = Instance.new("UICorner")
-ranksMinCorner.CornerRadius = UDim.new(0, 8)
-ranksMinCorner.Parent = ranksMinBtn
-
 -- Close button
 local ranksCloseBtn = Instance.new("TextButton")
 ranksCloseBtn.Size = UDim2.new(0, 36, 0, 36)
 ranksCloseBtn.Position = UDim2.new(1, -42, 0, 7)
 ranksCloseBtn.BackgroundColor3 = Color3.fromRGB(60, 58, 160)
-ranksCloseBtn.Text = "X"
+ranksCloseBtn.Text = "x"
 ranksCloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 ranksCloseBtn.TextSize = 16
 ranksCloseBtn.Font = Enum.Font.GothamBold
@@ -540,15 +525,20 @@ ranksSubBar.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
 ranksSubBar.BorderSizePixel = 0
 ranksSubBar.Parent = ranksPanel
 
-local leftArrow = Instance.new("TextLabel")
+local leftArrow = Instance.new("TextButton")
 leftArrow.Size = UDim2.new(0, 30, 1, 0)
 leftArrow.Position = UDim2.new(0, 5, 0, 0)
 leftArrow.BackgroundTransparency = 1
-leftArrow.Text = "â—„"
+leftArrow.Text = "<"
 leftArrow.TextColor3 = Color3.fromRGB(255, 255, 255)
 leftArrow.TextSize = 16
 leftArrow.Font = Enum.Font.GothamBold
 leftArrow.Parent = ranksSubBar
+
+leftArrow.MouseButton1Click:Connect(function()
+    subBarTitle.Text = "Server Ranks"
+    buildRanksPage()
+end)
 
 local subBarTitle = Instance.new("TextLabel")
 subBarTitle.Size = UDim2.new(1, -60, 1, 0)
@@ -561,15 +551,20 @@ subBarTitle.Font = Enum.Font.GothamBold
 subBarTitle.TextXAlignment = Enum.TextXAlignment.Center
 subBarTitle.Parent = ranksSubBar
 
-local rightArrow = Instance.new("TextLabel")
+local rightArrow = Instance.new("TextButton")
 rightArrow.Size = UDim2.new(0, 30, 1, 0)
 rightArrow.Position = UDim2.new(1, -35, 0, 0)
 rightArrow.BackgroundTransparency = 1
-rightArrow.Text = "â–º"
+rightArrow.Text = ">"
 rightArrow.TextColor3 = Color3.fromRGB(255, 255, 255)
 rightArrow.TextSize = 16
 rightArrow.Font = Enum.Font.GothamBold
 rightArrow.Parent = ranksSubBar
+
+rightArrow.MouseButton1Click:Connect(function()
+    subBarTitle.Text = "Server Members"
+    buildMembersPage()
+end)
 
 -- Scrollable ranks list
 local ranksScrollFrame = Instance.new("ScrollingFrame")
@@ -598,14 +593,14 @@ local ranksPanelMinimized = false
 ranksMinBtn.MouseButton1Click:Connect(function()
     ranksPanelMinimized = not ranksPanelMinimized
     if ranksPanelMinimized then
-        ranksScrollFrame.Visible = false
         ranksSubBar.Visible = false
-        ranksPanel.Size = UDim2.new(0, 300, 0, 50)  -- shrink to just the top bar
+        ranksScrollFrame.Visible = false
+        ranksPanel.Size = UDim2.new(0, 300, 0, 50)
         ranksMinBtn.Text = "+"
     else
-        ranksScrollFrame.Visible = true
         ranksSubBar.Visible = true
-        ranksPanel.Size = UDim2.new(0, 300, 0, 400)  -- restore full size
+        ranksScrollFrame.Visible = true
+        ranksPanel.Size = UDim2.new(0, 300, 0, 400)
         ranksMinBtn.Text = "-"
     end
 end)
