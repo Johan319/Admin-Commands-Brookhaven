@@ -502,6 +502,21 @@ ranksPanelTitle.Font = Enum.Font.GothamBold
 ranksPanelTitle.TextXAlignment = Enum.TextXAlignment.Left
 ranksPanelTitle.Parent = ranksPanelTopBar
 
+-- Minimize button
+local ranksMinBtn = Instance.new("TextButton")
+ranksMinBtn.Size = UDim2.new(0, 36, 0, 36)
+ranksMinBtn.Position = UDim2.new(1, -82, 0, 7)
+ranksMinBtn.BackgroundColor3 = Color3.fromRGB(60, 58, 160)
+ranksMinBtn.Text = "-"
+ranksMinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ranksMinBtn.TextSize = 20
+ranksMinBtn.Font = Enum.Font.GothamBold
+ranksMinBtn.Parent = ranksPanelTopBar
+
+local ranksMinCorner = Instance.new("UICorner")
+ranksMinCorner.CornerRadius = UDim.new(0, 8)
+ranksMinCorner.Parent = ranksMinBtn
+
 -- Close button
 local ranksCloseBtn = Instance.new("TextButton")
 ranksCloseBtn.Size = UDim2.new(0, 36, 0, 36)
@@ -512,10 +527,6 @@ ranksCloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 ranksCloseBtn.TextSize = 16
 ranksCloseBtn.Font = Enum.Font.GothamBold
 ranksCloseBtn.Parent = ranksPanelTopBar
-
-local ranksCloseCorner = Instance.new("UICorner")
-ranksCloseCorner.CornerRadius = UDim.new(0, 8)
-ranksCloseCorner.Parent = ranksCloseBtn
 
 -- Sub-header (Ranks nav bar)
 local ranksSubBar = Instance.new("Frame")
@@ -534,11 +545,6 @@ leftArrow.TextColor3 = Color3.fromRGB(255, 255, 255)
 leftArrow.TextSize = 16
 leftArrow.Font = Enum.Font.GothamBold
 leftArrow.Parent = ranksSubBar
-
-leftArrow.MouseButton1Click:Connect(function()
-    subBarTitle.Text = "Server Ranks"
-    buildRanksPage()
-end)
 
 local subBarTitle = Instance.new("TextLabel")
 subBarTitle.Size = UDim2.new(1, -60, 1, 0)
@@ -603,6 +609,16 @@ ranksMinBtn.MouseButton1Click:Connect(function()
         ranksPanel.Size = UDim2.new(0, 300, 0, 400)
         ranksMinBtn.Text = "-"
     end
+end)
+
+rightArrow.MouseButton1Click:Connect(function()
+    subBarTitle.Text = "Server Members"
+    buildMembersPage()
+end)
+
+leftArrow.MouseButton1Click:Connect(function()
+    subBarTitle.Text = "Server Ranks"
+    buildRanksPage()
 end)
 
 -- Rank display order (matches image style: level badge + name)
