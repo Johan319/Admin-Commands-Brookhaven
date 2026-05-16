@@ -484,7 +484,7 @@ local backLabel = Instance.new("TextLabel")
 backLabel.Size = UDim2.new(0, 40, 1, 0)
 backLabel.Position = UDim2.new(0, 10, 0, 0)
 backLabel.BackgroundTransparency = 1
-backLabel.Text = "â†"
+backLabel.Text = "Ã¢â€ Â"
 backLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 backLabel.TextSize = 22
 backLabel.Font = Enum.Font.GothamBold
@@ -842,7 +842,7 @@ local function showServerRanksPanel()
         -- Skip ranks nobody is assigned to
         if #members == 0 then continue end
 
-        -- â”€â”€ RANK HEADER ROW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        -- Ã¢â€â‚¬Ã¢â€â‚¬ RANK HEADER ROW Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
         local headerRow = Instance.new("Frame")
         headerRow.Size = UDim2.new(1, 0, 0, HEADER_H)
         headerRow.BackgroundColor3 = Color3.fromRGB(22, 22, 38)
@@ -899,7 +899,7 @@ local function showServerRanksPanel()
         countBadgeCorner.CornerRadius = UDim.new(0, 5)
         countBadgeCorner.Parent = countBadge
 
-        -- â”€â”€ MEMBER ROWS (one per person in this rank) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        -- Ã¢â€â‚¬Ã¢â€â‚¬ MEMBER ROWS (one per person in this rank) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
         for _, memberInfo in ipairs(members) do
             local username  = memberInfo.name
             local onlinePlr = memberInfo.onlinePlayer
@@ -982,12 +982,12 @@ local function showServerRanksPanel()
             playerNameLabel.TextXAlignment = Enum.TextXAlignment.Left
             playerNameLabel.Parent = memberRow
 
-            -- Rank â€¢ Online/Offline subtitle
+            -- Rank Ã¢â‚¬Â¢ Online/Offline subtitle
             local rankSubLabel = Instance.new("TextLabel")
             rankSubLabel.Size = UDim2.new(1, -75, 0, 18)
             rankSubLabel.Position = UDim2.new(0, 70, 0, 33)
             rankSubLabel.BackgroundTransparency = 1
-            rankSubLabel.Text = rank .. "  â€¢  " .. (isOnline and "Online" or "Offline")
+            rankSubLabel.Text = rank .. "  Ã¢â‚¬Â¢  " .. (isOnline and "Online" or "Offline")
             rankSubLabel.TextColor3 = isOnline
                 and Color3.fromRGB(0, 195, 85)
                 or  Color3.fromRGB(110, 110, 130)
