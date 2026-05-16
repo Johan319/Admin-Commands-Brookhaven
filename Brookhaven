@@ -633,11 +633,6 @@ ranksCloseBtn.MouseButton1Click:Connect(function()
     ranksPanel.Visible = false
 end)
 
--- Replace this block (lines 591-593):
-ranksMinBtn.MouseButton1Click:Connect(function()
-    ranksPanel.Visible = false
-end)
-
 -- With this:
 local ranksPanelMinimized = false
 ranksMinBtn.MouseButton1Click:Connect(function()
@@ -653,11 +648,6 @@ ranksMinBtn.MouseButton1Click:Connect(function()
         ranksPanel.Size = UDim2.new(0, 300, 0, 400)
         ranksMinBtn.Text = "-"
     end
-end)
-
-rightArrow.MouseButton1Click:Connect(function()
-    subBarTitle.Text = "Server Members"
-    buildMembersPage()
 end)
 
 leftArrow.MouseButton1Click:Connect(function()
