@@ -943,85 +943,103 @@ closeBtn.MouseButton1Click:Connect(function()
     cmdbarFrame.Visible = false
 end)
 
--- Bring Functions
-local function messyFling(target)
-    if flinging then return end
-    flinging = true
+-- ============================================
+-- BRING FUNCTION (Couch method - updated)
+-- ============================================
+local function bringPlayerCouch(target)
+    local char = player.Character
+    if not char then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local root = char:FindFirstChild("HumanoidRootPart")
+    local tRoot = target.Character and target.Character:FindFirstChild("HumanoidRootPart")
+    if not hum or not root or not tRoot then return end
 
-    local targetChar = target.Character
-    local myChar = player.Character
-    if not targetChar or not myChar then flinging = false return end
+    local originalPos = root.Position
 
-    local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
-    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
-    if not targetRoot or not myRoot then flinging = false return end
+    pcall(function()
+        game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Clea1rTool1s"):FireServer("ClearAllTools")
+    end)
+    task.wait(0.2)
 
-    local originalCFrame = myRoot.CFrame
-    local hum = myChar:FindFirstChildOfClass("Humanoid")
-    if hum then
-        hum:ChangeState(Enum.HumanoidStateType.Physics)
-        hum.PlatformStand = true
-    end
+    pcall(function()
+        game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "Couch")
+    end)
+    task.wait(0.3)
 
-    myRoot.AssemblyLinearVelocity = Vector3.zero
-    myRoot.AssemblyAngularVelocity = Vector3.zero
+    local tool = player.Backpack:FindFirstChild("Couch")
+    if tool then tool.Parent = char end
+    task.wait(0.1)
 
-    local bp = Instance.new("BodyPosition")
-    bp.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-    bp.D = 100; bp.P = 50000; bp.Parent = myRoot
+    pcall(function()
+        game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.F, false, game)
+    end)
+    task.wait(0.1)
 
-    local bg = Instance.new("BodyGyro")
-    bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-    bg.D = 10; bg.P = 10000; bg.Parent = myRoot
+    hum:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+    hum.PlatformStand = false
+    workspace.CurrentCamera.CameraSubject = target.Character:FindFirstChild("Head") or tRoot or hum
 
-    local bav = Instance.new("BodyAngularVelocity")
-    bav.AngularVelocity = Vector3.new(math.random(-30,30), math.random(-60,60), math.random(-30,30))
-    bav.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-    bav.Parent = myRoot
+    local align = Instance.new("BodyPosition")
+    align.Name = "BringPosition"
+    align.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    align.D = 10
+    align.P = 30000
+    align.Position = root.Position
+    align.Parent = tRoot
 
-    local connection
-    local elapsed = 0
+    task.spawn(function()
+        local angle = 0
+        local startTime = tick()
 
-    connection = game:GetService("RunService").Heartbeat:Connect(function(dt)
-        elapsed = elapsed + dt
-        targetChar = target.Character
-        myChar = player.Character
-        if not targetChar or not myChar then connection:Disconnect() flinging = false return end
+        while tick() - startTime < 5
+            and target
+            and target.Character
+            and target.Character:FindFirstChildOfClass("Humanoid") do
 
-        targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
-        myRoot = myChar:FindFirstChild("HumanoidRootPart")
-        if not targetRoot or not myRoot then connection:Disconnect() flinging = false return end
+            local tHum = target.Character:FindFirstChildOfClass("Humanoid")
+            if not tHum or tHum.Sit then break end
 
-        bp.Position = targetRoot.Position + Vector3.new(math.random(-2,2), math.random(0,3), math.random(-2,2))
-        bg.CFrame = CFrame.Angles(math.random(-10,10)*0.05, math.random(-10,10)*0.05, math.random(-10,10)*0.05)
+            local hrp = target.Character:FindFirstChild("HumanoidRootPart")
+            if not hrp then break end
 
-        local bv = Instance.new("BodyVelocity")
-        bv.Velocity = Vector3.new(math.random(-200,200), math.random(50,300), math.random(-200,200))
-        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        bv.Parent = targetRoot
-        game:GetService("Debris"):AddItem(bv, 0.05)
+            local adjustedPos = hrp.Position + (hrp.Velocity / 1.5)
+            angle += 50
+            root.CFrame = CFrame.new(adjustedPos + Vector3.new(0, 2, 0)) * CFrame.Angles(math.rad(angle), 0, 0)
+            align.Position = root.Position + Vector3.new(2, 0, 0)
+            task.wait()
+        end
 
-        local ba = Instance.new("BodyAngularVelocity")
-        ba.AngularVelocity = Vector3.new(math.random(-40,40), math.random(-40,40), math.random(-40,40))
-        ba.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-        ba.Parent = targetRoot
-        game:GetService("Debris"):AddItem(ba, 0.05)
+        align:Destroy()
+        hum:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+        hum.PlatformStand = false
+        workspace.CurrentCamera.CameraSubject = hum
 
-        if elapsed >= 1 then
-            connection:Disconnect()
-            bp:Destroy(); bg:Destroy(); bav:Destroy()
-            flinging = false
-            if myRoot then
-                myRoot.CFrame = originalCFrame
-                myRoot.AssemblyLinearVelocity = Vector3.zero
-                myRoot.AssemblyAngularVelocity = Vector3.zero
-            end
-            if hum then
-                hum.PlatformStand = false
-                hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+        for _, p in pairs(char:GetDescendants()) do
+            if p:IsA("BasePart") then
+                p.Velocity = Vector3.zero
+                p.RotVelocity = Vector3.zero
             end
         end
+
+        task.wait(0.1)
+        root.Anchored = true
+        root.CFrame = CFrame.new(originalPos)
+        task.wait(0.001)
+        root.Anchored = false
+        task.wait(0.7)
+
+        local droppedTool = char:FindFirstChild("Couch")
+        if droppedTool then droppedTool.Parent = player.Backpack end
+        task.wait(0.001)
+
+        pcall(function()
+            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "Couch")
+        end)
+
+        addLog("Bring finished on: " .. target.Name)
     end)
+
+    addLog(player.Name .. " used bring on " .. target.Name .. " (" .. target.DisplayName .. ")")
 end
 
 -- Dex/Explorer function (Admin rank)
@@ -2280,7 +2298,7 @@ local function showCommandsPanel()
         {cmd = "speed/walkspeed <num>", desc = "Set your walk speed", rank = "Moderator", rankLevel = 60},
         {cmd = "serverranks",        desc = "Show group ranks panel",        rank = "Member",      rankLevel = 10},
         {cmd = "cmdbar2", desc = "Open command bar", rank = "Moderator", rankLevel = 60},
-        {cmd = "bring <player>", desc = "Fling/bring a player to you", rank = "Head Admin", rankLevel = 80},
+        {cmd = "bring", args = "<player>", desc = "Bring a player to you (couch)", rank = "Moderator", rankLevel = 60},
         {cmd = "toolteleport", desc = "Load tool teleport script", rank = "Moderator", rankLevel = 60},
         {cmd = "dex / explorer", desc = "Open Dex Explorer (exploit tool)", rank = "Admin", rankLevel = 70},
         {cmd = "antivoid", desc = "Load anti-void script", rank = "Admin", rankLevel = 70},
@@ -2484,8 +2502,8 @@ elseif command == "unloopkill" then
         end
 
     elseif command == "bring" then
-        if not hasPermission(player, "Head Admin") then
-            addLog("Permission denied: Head Admin required")
+        if not hasPermission(player, "Moderator") then
+            addLog("Permission denied: Moderator required")
             return
         end
         if targetName then
@@ -2493,17 +2511,18 @@ elseif command == "unloopkill" then
             if target then
                 if target == player then
                     addLog("You cannot bring yourself!")
+                elseif not target.Character or not target.Character:FindFirstChild("HumanoidRootPart") then
+                    addLog("Target has no character loaded")
                 else
-                    messyFling(target)
-                    commandCount = commandCount + 1
+                    bringPlayerCouch(target)
+                    commandCount += 1
                     counterLabel.Text = tostring(commandCount)
-                    addLog(player.Name .. " used bring on " .. target.Name)
                 end
             else
                 addLog("Player not found: " .. targetName)
             end
         else
-            addLog("Usage: " .. prefix .. "bring <player name>")
+            addLog("Usage: " .. prefix .. "bring <username or nickname>")
         end
 
     elseif command == "serverranks" then
