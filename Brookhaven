@@ -2980,10 +2980,6 @@ end)
 -- ============================================
 -- EVENT CONNECTIONS
 -- ============================================
-stopSpectateButton.MouseButton1Click:Connect(function()
-    stopSpectating()
-end)
-
 player.CharacterAdded:Connect(function(character)
     if isSpectating then stopSpectating() end
 end)
