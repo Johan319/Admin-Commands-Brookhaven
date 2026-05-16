@@ -1971,6 +1971,55 @@ local function toggleAntiFling()
     end
 end
 
+-- fly funtions
+local function startFly()
+    local char = player.Character
+    if not char then return end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChild("Humanoid")
+    if not root or not hum then return end
+    hum.PlatformStand = true
+    local bv = Instance.new("BodyVelocity")
+    bv.MaxForce = Vector3.new(99999, 99999, 99999)
+    bv.Velocity = Vector3.new(0, 0, 0)
+    bv.Parent = root
+    local bg = Instance.new("BodyGyro")
+    bg.MaxTorque = Vector3.new(99999, 99999, 99999)
+    bg.P = 12500
+    bg.Parent = root
+    local RunService = game:GetService("RunService")
+    RunService.RenderStepped:Connect(function()
+        if not bv or not bv.Parent then return end
+        local cam = workspace.CurrentCamera
+        local uis = game:GetService("UserInputService")
+        local move = Vector3.new(0, 0, 0)
+        local vertical = 0
+        if uis:IsKeyDown(Enum.KeyCode.Space) then vertical = 1 end
+        if uis:IsKeyDown(Enum.KeyCode.LeftControl) then vertical = -1 end
+        local finalDir = Vector3.new(move.X, vertical, move.Z)
+        if finalDir.Magnitude > 0 then
+            bv.Velocity = cam.CFrame:VectorToWorldSpace(finalDir.Unit) * 50
+        else
+            bv.Velocity = Vector3.new(0, 0, 0)
+        end
+        if bg then bg.CFrame = cam.CFrame end
+    end)
+end
+
+local function stopFly()
+    local char = player.Character
+    if not char then return end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if root then
+        local bv = root:FindFirstChild("BodyVelocity")
+        local bg = root:FindFirstChild("BodyGyro")
+        if bv then bv:Destroy() end
+        if bg then bg:Destroy() end
+    end
+    local hum = char:FindFirstChild("Humanoid")
+    if hum then hum.PlatformStand = false end
+end
+
 -- Spectate functions
 local function stopSpectating()
     if isSpectating then
@@ -2427,6 +2476,8 @@ local function showCommandsPanel()
     end
     
     local commands = {
+        {cmd = "fly", desc = "Fly", rank = "Moderator", rankLevel = 60},
+        {cmd = "unfly", desc = "Stop flying", rank = "Moderator", rankLevel = 60},
         {cmd = "skyboxnuke",   desc = "Enable nuke skybox animation",  rank = "Head Admin", rankLevel = 80},
         {cmd = "unskyboxnuke", desc = "Disable nuke skybox animation", rank = "Head Admin", rankLevel = 80},
         {cmd = "jail <player>", desc = "Jail player to void (couch method)", rank = "Admin", rankLevel = 70},
@@ -2787,6 +2838,22 @@ elseif command == "unloopkill" then
     else
         addLog("Usage: " .. prefix .. command .. " <speed>")
     end
+
+    elseif command == "fly" then
+        if not hasPermission(player, "Moderator") then
+            addLog("Permission denied: Moderator required")
+            return
+        end
+        startFly()
+        addLog(player.Name .. " is now flying")
+
+    elseif command == "unfly" then
+        if not hasPermission(player, "Moderator") then
+            addLog("Permission denied: Moderator required")
+            return
+        end
+        stopFly()
+        addLog(player.Name .. " stopped flying")
 
     elseif command == "infjump" then
         if not hasPermission(player, "Moderator") then
