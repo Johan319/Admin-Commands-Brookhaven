@@ -1971,54 +1971,230 @@ local function toggleAntiFling()
     end
 end
 
--- fly funtions
-local function startFly()
+==========================
+-- FLY+GUI FUNTIONS
+==========================
+local flying = false
+local flySpeed = 50
+local flyMinimized = false
+local flyBv, flyBg = nil, nil
+local startFly, stopFly
+
+local TweenService = game:GetService("TweenService")
+
+local flySg = Instance.new("ScreenGui")
+flySg.Name = "AkbarshoxFlyV3"
+flySg.ResetOnSpawn = false
+flySg.Parent = player:WaitForChild("PlayerGui")
+
+local flyFrame = Instance.new("Frame")
+flyFrame.Size = UDim2.new(0, 220, 0, 170)
+flyFrame.Position = UDim2.new(1, -240, 0, 155)
+flyFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
+flyFrame.BorderSizePixel = 0
+flyFrame.Active = true
+flyFrame.Draggable = true
+flyFrame.Visible = false
+flyFrame.Parent = flySg
+Instance.new("UICorner", flyFrame).CornerRadius = UDim.new(0, 10)
+
+local flyHeader = Instance.new("Frame")
+flyHeader.Size = UDim2.new(1, 0, 0, 36)
+flyHeader.BackgroundColor3 = Color3.fromRGB(110, 75, 200)
+flyHeader.BorderSizePixel = 0
+flyHeader.Parent = flyFrame
+Instance.new("UICorner", flyHeader).CornerRadius = UDim.new(0, 10)
+
+local flyHeaderFix = Instance.new("Frame")
+flyHeaderFix.Size = UDim2.new(1, 0, 0.5, 0)
+flyHeaderFix.Position = UDim2.new(0, 0, 0.5, 0)
+flyHeaderFix.BackgroundColor3 = Color3.fromRGB(110, 75, 200)
+flyHeaderFix.BorderSizePixel = 0
+flyHeaderFix.Parent = flyHeader
+
+local flyTitle = Instance.new("TextLabel")
+flyTitle.Size = UDim2.new(1, -80, 1, 0)
+flyTitle.Position = UDim2.new(0, 12, 0, 0)
+flyTitle.BackgroundTransparency = 1
+flyTitle.Text = "Fly Made by Johan"
+flyTitle.TextColor3 = Color3.new(1, 1, 1)
+flyTitle.TextSize = 16
+flyTitle.Font = Enum.Font.GothamBold
+flyTitle.TextXAlignment = Enum.TextXAlignment.Left
+flyTitle.Parent = flyHeader
+
+local flyMinBtn = Instance.new("TextButton")
+flyMinBtn.Size = UDim2.new(0, 26, 0, 22)
+flyMinBtn.Position = UDim2.new(1, -58, 0, 7)
+flyMinBtn.BackgroundColor3 = Color3.fromRGB(80, 55, 150)
+flyMinBtn.Text = "-"
+flyMinBtn.TextColor3 = Color3.new(1, 1, 1)
+flyMinBtn.TextSize = 18
+flyMinBtn.Font = Enum.Font.GothamBold
+flyMinBtn.Parent = flyHeader
+Instance.new("UICorner", flyMinBtn).CornerRadius = UDim.new(0, 5)
+
+local flyCloseBtn = Instance.new("TextButton")
+flyCloseBtn.Size = UDim2.new(0, 26, 0, 22)
+flyCloseBtn.Position = UDim2.new(1, -28, 0, 7)
+flyCloseBtn.BackgroundColor3 = Color3.fromRGB(80, 55, 150)
+flyCloseBtn.Text = "x"
+flyCloseBtn.TextColor3 = Color3.new(1, 1, 1)
+flyCloseBtn.TextSize = 14
+flyCloseBtn.Font = Enum.Font.GothamBold
+flyCloseBtn.Parent = flyHeader
+Instance.new("UICorner", flyCloseBtn).CornerRadius = UDim.new(0, 5)
+
+local flyBody = Instance.new("Frame")
+flyBody.Size = UDim2.new(1, 0, 1, -36)
+flyBody.Position = UDim2.new(0, 0, 0, 36)
+flyBody.BackgroundTransparency = 1
+flyBody.Parent = flyFrame
+
+local flyStatusRow = Instance.new("Frame")
+flyStatusRow.Size = UDim2.new(1, -20, 0, 32)
+flyStatusRow.Position = UDim2.new(0, 10, 0, 8)
+flyStatusRow.BackgroundTransparency = 1
+flyStatusRow.Parent = flyBody
+
+local flyStatusLabel = Instance.new("TextLabel")
+flyStatusLabel.Size = UDim2.new(0.5, 0, 1, 0)
+flyStatusLabel.BackgroundTransparency = 1
+flyStatusLabel.Text = "Status:"
+flyStatusLabel.TextColor3 = Color3.fromRGB(210, 210, 210)
+flyStatusLabel.TextSize = 14
+flyStatusLabel.Font = Enum.Font.Gotham
+flyStatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+flyStatusLabel.Parent = flyStatusRow
+
+local flyStatusValue = Instance.new("TextLabel")
+flyStatusValue.Size = UDim2.new(0.5, 0, 1, 0)
+flyStatusValue.Position = UDim2.new(0.42, 0, 0, 0)
+flyStatusValue.BackgroundTransparency = 1
+flyStatusValue.Text = "Off"
+flyStatusValue.TextColor3 = Color3.fromRGB(220, 60, 60)
+flyStatusValue.TextSize = 14
+flyStatusValue.Font = Enum.Font.GothamBold
+flyStatusValue.TextXAlignment = Enum.TextXAlignment.Left
+flyStatusValue.Parent = flyStatusRow
+
+local flyToggle = Instance.new("TextButton")
+flyToggle.Size = UDim2.new(1, -20, 0, 40)
+flyToggle.Position = UDim2.new(0, 10, 0, 46)
+flyToggle.BackgroundColor3 = Color3.fromRGB(110, 75, 200)
+flyToggle.Text = "ENABLE"
+flyToggle.TextColor3 = Color3.new(1, 1, 1)
+flyToggle.TextSize = 15
+flyToggle.Font = Enum.Font.GothamBold
+flyToggle.Parent = flyBody
+Instance.new("UICorner", flyToggle).CornerRadius = UDim.new(0, 8)
+
+local flySpeedRow = Instance.new("Frame")
+flySpeedRow.Size = UDim2.new(1, -20, 0, 34)
+flySpeedRow.Position = UDim2.new(0, 10, 0, 96)
+flySpeedRow.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+flySpeedRow.Parent = flyBody
+Instance.new("UICorner", flySpeedRow).CornerRadius = UDim.new(0, 8)
+
+local flySpeedLabel = Instance.new("TextLabel")
+flySpeedLabel.Size = UDim2.new(0.5, 0, 1, 0)
+flySpeedLabel.Position = UDim2.new(0, 12, 0, 0)
+flySpeedLabel.BackgroundTransparency = 1
+flySpeedLabel.Text = "Speed:"
+flySpeedLabel.TextColor3 = Color3.fromRGB(210, 210, 210)
+flySpeedLabel.TextSize = 14
+flySpeedLabel.Font = Enum.Font.Gotham
+flySpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
+flySpeedLabel.Parent = flySpeedRow
+
+local flySpeedBox = Instance.new("TextBox")
+flySpeedBox.Size = UDim2.new(0.4, 0, 0.7, 0)
+flySpeedBox.Position = UDim2.new(0.55, 0, 0.15, 0)
+flySpeedBox.BackgroundTransparency = 1
+flySpeedBox.Text = tostring(flySpeed)
+flySpeedBox.TextColor3 = Color3.new(1, 1, 1)
+flySpeedBox.TextSize = 14
+flySpeedBox.Font = Enum.Font.GothamBold
+flySpeedBox.TextXAlignment = Enum.TextXAlignment.Right
+flySpeedBox.Parent = flySpeedRow
+
+startFly = function()
+    if flying then return end
     local char = player.Character
     if not char then return end
     local root = char:FindFirstChild("HumanoidRootPart")
     local hum = char:FindFirstChild("Humanoid")
     if not root or not hum then return end
+    flying = true
     hum.PlatformStand = true
-    local bv = Instance.new("BodyVelocity")
-    bv.MaxForce = Vector3.new(99999, 99999, 99999)
-    bv.Velocity = Vector3.new(0, 0, 0)
-    bv.Parent = root
-    local bg = Instance.new("BodyGyro")
-    bg.MaxTorque = Vector3.new(99999, 99999, 99999)
-    bg.P = 12500
-    bg.Parent = root
-    local RunService = game:GetService("RunService")
-    RunService.RenderStepped:Connect(function()
-        if not bv or not bv.Parent then return end
-        local cam = workspace.CurrentCamera
-        local uis = game:GetService("UserInputService")
-        local move = Vector3.new(0, 0, 0)
-        local vertical = 0
-        if uis:IsKeyDown(Enum.KeyCode.Space) then vertical = 1 end
-        if uis:IsKeyDown(Enum.KeyCode.LeftControl) then vertical = -1 end
-        local finalDir = Vector3.new(move.X, vertical, move.Z)
-        if finalDir.Magnitude > 0 then
-            bv.Velocity = cam.CFrame:VectorToWorldSpace(finalDir.Unit) * 50
-        else
-            bv.Velocity = Vector3.new(0, 0, 0)
-        end
-        if bg then bg.CFrame = cam.CFrame end
-    end)
+    flyBv = Instance.new("BodyVelocity")
+    flyBv.MaxForce = Vector3.new(99999, 99999, 99999)
+    flyBv.Velocity = Vector3.new(0, 0, 0)
+    flyBv.Parent = root
+    flyBg = Instance.new("BodyGyro")
+    flyBg.MaxTorque = Vector3.new(99999, 99999, 99999)
+    flyBg.P = 12500
+    flyBg.Parent = root
+    flyToggle.Text = "DISABLE"
+    flyStatusValue.Text = "On"
+    flyStatusValue.TextColor3 = Color3.fromRGB(80, 220, 80)
+    flyFrame.Visible = true
 end
 
-local function stopFly()
-    local char = player.Character
-    if not char then return end
-    local root = char:FindFirstChild("HumanoidRootPart")
-    if root then
-        local bv = root:FindFirstChild("BodyVelocity")
-        local bg = root:FindFirstChild("BodyGyro")
-        if bv then bv:Destroy() end
-        if bg then bg:Destroy() end
-    end
-    local hum = char:FindFirstChild("Humanoid")
+stopFly = function()
+    flying = false
+    if flyBv then flyBv:Destroy() end
+    if flyBg then flyBg:Destroy() end
+    local hum = player.Character and player.Character:FindFirstChild("Humanoid")
     if hum then hum.PlatformStand = false end
+    flyToggle.Text = "ENABLE"
+    flyStatusValue.Text = "Off"
+    flyStatusValue.TextColor3 = Color3.fromRGB(220, 60, 60)
+    flyFrame.Visible = false
 end
+
+flyToggle.MouseButton1Click:Connect(function()
+    if flying then stopFly() else startFly() end
+end)
+
+flySpeedBox.FocusLost:Connect(function()
+    local val = tonumber(flySpeedBox.Text)
+    if val then flySpeed = val else flySpeedBox.Text = tostring(flySpeed) end
+end)
+
+flyMinBtn.MouseButton1Click:Connect(function()
+    flyMinimized = not flyMinimized
+    if flyMinimized then
+        flyBody.Visible = false
+        flyMinBtn.Text = "+"
+        TweenService:Create(flyFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 220, 0, 36)}):Play()
+    else
+        flyMinBtn.Text = "-"
+        TweenService:Create(flyFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 220, 0, 170)}):Play()
+        task.wait(0.25)
+        flyBody.Visible = true
+    end
+end)
+
+flyCloseBtn.MouseButton1Click:Connect(function()
+    stopFly()
+end)
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    if not flying or not flyBv then return end
+    local cam = workspace.CurrentCamera
+    local vertical = 0
+    local uis = game:GetService("UserInputService")
+    if uis:IsKeyDown(Enum.KeyCode.Space) then vertical = 1 end
+    if uis:IsKeyDown(Enum.KeyCode.LeftControl) then vertical = -1 end
+    local finalDir = Vector3.new(0, vertical, 0)
+    if finalDir.Magnitude > 0 then
+        flyBv.Velocity = cam.CFrame:VectorToWorldSpace(finalDir.Unit) * flySpeed
+    else
+        flyBv.Velocity = Vector3.new(0, 0, 0)
+    end
+    if flyBg then flyBg.CFrame = cam.CFrame end
+end)
 
 -- Spectate functions
 local function stopSpectating()
@@ -2476,7 +2652,7 @@ local function showCommandsPanel()
     end
     
     local commands = {
-        {cmd = "fly", desc = "Fly", rank = "Moderator", rankLevel = 60},
+        {cmd = "fly", desc = "Fly around", rank = "Moderator", rankLevel = 60},
         {cmd = "unfly", desc = "Stop flying", rank = "Moderator", rankLevel = 60},
         {cmd = "skyboxnuke",   desc = "Enable nuke skybox animation",  rank = "Head Admin", rankLevel = 80},
         {cmd = "unskyboxnuke", desc = "Disable nuke skybox animation", rank = "Head Admin", rankLevel = 80},
@@ -2846,6 +3022,8 @@ elseif command == "unloopkill" then
         end
         startFly()
         addLog(player.Name .. " is now flying")
+        commandCount = commandCount + 1
+        counterLabel.Text = tostring(commandCount)
 
     elseif command == "unfly" then
         if not hasPermission(player, "Moderator") then
@@ -2854,6 +3032,8 @@ elseif command == "unloopkill" then
         end
         stopFly()
         addLog(player.Name .. " stopped flying")
+        commandCount = commandCount + 1
+        counterLabel.Text = tostring(commandCount)
 
     elseif command == "infjump" then
         if not hasPermission(player, "Moderator") then
