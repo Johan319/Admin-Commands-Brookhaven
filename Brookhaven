@@ -218,20 +218,6 @@ spectateText.TextSize = 14
 spectateText.Font = Enum.Font.GothamBold
 spectateText.Parent = spectateIndicator
 
-local stopSpectateButton = Instance.new("TextButton")
-stopSpectateButton.Size = UDim2.new(0, 60, 1, 0)
-stopSpectateButton.Position = UDim2.new(1, -65, 0, 0)
-stopSpectateButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-stopSpectateButton.Text = "STOP"
-stopSpectateButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-stopSpectateButton.TextSize = 12
-stopSpectateButton.Font = Enum.Font.GothamBold
-stopSpectateButton.Parent = spectateIndicator
-
-local stopCorner = Instance.new("UICorner")
-stopCorner.CornerRadius = UDim.new(0, 6)
-stopCorner.Parent = stopSpectateButton
-
 -- AntiSit status indicator
 local antiSitIndicator = Instance.new("Frame")
 antiSitIndicator.Size = UDim2.new(0, 150, 0, 25)
