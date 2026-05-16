@@ -2664,6 +2664,16 @@ elseif command == "unloopkill" then
             addLog("Usage: " .. prefix .. command .. " <player name>")
         end
 
+   elseif command == "unview" or command == "unspectate" then
+        if not hasPermission(player, "Moderator") then
+            addLog("Permission denied: Moderator required")
+            return
+        end
+        stopSpectating()
+        addLog(player.Name .. " stopped spectating")
+        commandCount = commandCount + 1
+        counterLabel.Text = tostring(commandCount)
+
     elseif command == "bring" then
         if not hasPermission(player, "Moderator") then
             addLog("Permission denied: Moderator required")
