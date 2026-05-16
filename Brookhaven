@@ -1016,8 +1016,8 @@ cmdbarGui.ResetOnSpawn = false
 cmdbarGui.Parent = player.PlayerGui
 
 local cmdbarFrame = Instance.new("Frame")
-cmdbarFrame.Size = UDim2.new(0, 340, 0, 90)
-cmdbarFrame.Position = UDim2.new(0.5, -170, 0.5, -45)
+cmdbarFrame.Size = UDim2.new(0, 300, 0, 90)
+cmdbarFrame.Position = UDim2.new(0.5, -150, 0.5, -45)
 cmdbarFrame.BackgroundColor3 = Color3.fromRGB(80, 60, 180)
 cmdbarFrame.BorderSizePixel = 0
 cmdbarFrame.Visible = false
@@ -1085,24 +1085,24 @@ executeBtnCorner.Parent = executeBtn
 closeBtn.MouseButton1Click:Connect(function()
     cmdbarFrame.Visible = false
 end)
-
-local dragging, dragStart, startPos
+-- Drag support for cmdbar2
+local cmdDragging, cmdDragStart, cmdStartPos
 cmdbarTitle.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = cmdbarFrame.Position
+        cmdDragging = true
+        cmdDragStart = input.Position
+        cmdStartPos = cmdbarFrame.Position
     end
 end)
 cmdbarTitle.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
-        local delta = input.Position - dragStart
-        cmdbarFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    if cmdDragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
+        local delta = input.Position - cmdDragStart
+        cmdbarFrame.Position = UDim2.new(cmdStartPos.X.Scale, cmdStartPos.X.Offset + delta.X, cmdStartPos.Y.Scale, cmdStartPos.Y.Offset + delta.Y)
     end
 end)
 cmdbarTitle.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
+        cmdDragging = false
     end
 end)
 
