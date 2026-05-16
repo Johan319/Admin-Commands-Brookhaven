@@ -633,23 +633,6 @@ ranksCloseBtn.MouseButton1Click:Connect(function()
     ranksPanel.Visible = false
 end)
 
--- With this:
-local ranksPanelMinimized = false
-ranksMinBtn.MouseButton1Click:Connect(function()
-    ranksPanelMinimized = not ranksPanelMinimized
-    if ranksPanelMinimized then
-        ranksSubBar.Visible = false
-        ranksScrollFrame.Visible = false
-        ranksPanel.Size = UDim2.new(0, 300, 0, 50)
-        ranksMinBtn.Text = "+"
-    else
-        ranksSubBar.Visible = true
-        ranksScrollFrame.Visible = true
-        ranksPanel.Size = UDim2.new(0, 300, 0, 400)
-        ranksMinBtn.Text = "-"
-    end
-end)
-
 leftArrow.MouseButton1Click:Connect(function()
     subBarTitle.Text = "Server Ranks"
     buildRanksPage()
