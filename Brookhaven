@@ -2446,27 +2446,6 @@ local function openScriptBlox()
         HideGUI()
     end)
     
-    -- =====================
-    --   OPEN ANIMATION (plays when toggled visible via ;scriptblox)
-    -- =====================
-    local function ShowGUI()
-        Main.Size = UDim2.new(0, 480, 0, 0)
-        Main.Visible = true
-        Shadow.Visible = true
-        TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0, 480, 0, FULL_H)
-        }):Play()
-    end
-    
-    local function HideGUI()
-        TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Quart), {
-            Size = UDim2.new(0, 480, 0, 0)
-        }):Play()
-        task.wait(0.22)
-        Main.Visible = false
-        Shadow.Visible = false
-    end
-
     print("GhostHub loaded!")
     ShowGUI()
     
