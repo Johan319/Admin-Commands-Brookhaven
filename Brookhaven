@@ -1740,12 +1740,749 @@ end
 -- scriptblox funtions
 -- ==============================
 local function openScriptBlox()
-    local ok, result = pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Johan319/commands-brookhaven/refs/heads/main/po"))()
-    end)
-    if not ok then
-        addLog("ScriptBlox failed: " .. tostring(result))
+    -- GhostHub Script Hub
+    -- No emojis (Roblox font incompatible), fixed dragging, ScriptBlox chat bar
+    
+    local Players = game:GetService("Players")
+    local TweenService = game:GetService("TweenService")
+    local HttpService = game:GetService("HttpService")
+    local UserInputService = game:GetService("UserInputService")
+    
+    local LocalPlayer = Players.LocalPlayer
+    local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+    
+    if PlayerGui:FindFirstChild("GhostHub") then
+        PlayerGui:FindFirstChild("GhostHub"):Destroy()
     end
+    
+    local C = {
+        Bg      = Color3.fromRGB(28, 31, 38),
+        Surface = Color3.fromRGB(34, 38, 48),
+        Card    = Color3.fromRGB(38, 42, 54),
+        Accent  = Color3.fromRGB(80, 140, 230),
+        Text    = Color3.fromRGB(230, 230, 240),
+        Sub     = Color3.fromRGB(120, 125, 145),
+        Green   = Color3.fromRGB(70, 200, 120),
+        Red     = Color3.fromRGB(210, 70, 70),
+        API     = "https://scriptblox.com/api/script/search?q=%s&page=1&max=20",
+        ThumbAPI = "https://thumbnails.roblox.com/v1/games/icons?universeIds=%s&size=150x150&format=Png&isCircular=false",
+    }
+    
+    -- =====================
+    --   SCREEN GUI
+    -- =====================
+    local Gui = Instance.new("ScreenGui")
+    Gui.Name = "ScriptBlox Made by Johan"
+    Gui.ResetOnSpawn = false
+    Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    Gui.Parent = PlayerGui
+    
+    -- =====================
+    --   SHADOW (behind main)
+    -- =====================
+    local Shadow = Instance.new("ImageLabel")
+    Shadow.Name = "Shadow"
+    Shadow.AnchorPoint = Vector2.new(0.5, 0.5)
+    Shadow.BackgroundTransparency = 1
+    Shadow.Position = UDim2.new(0.5, 0, 0.5, 6)
+    Shadow.Size = UDim2.new(0, 520, 0, 400)
+    Shadow.ZIndex = 0
+    Shadow.Image = "rbxassetid://6014261993"
+    Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+    Shadow.ImageTransparency = 0.55
+    Shadow.ScaleType = Enum.ScaleType.Slice
+    Shadow.SliceCenter = Rect.new(49, 49, 450, 450)
+    Shadow.Visible = false  -- hidden until ;scriptblox
+    Shadow.Parent = Gui
+    
+    -- =====================
+    --   MAIN FRAME
+    -- NOTE: ClipsDescendants OFF so input reaches TBar correctly
+    -- =====================
+    local Main = Instance.new("Frame")
+    Main.Name = "Main"
+    Main.Size = UDim2.new(0, 480, 0, 370)
+    Main.Position = UDim2.new(0.5, -240, 0.5, -185)
+    Main.BackgroundColor3 = C.Bg
+    Main.BorderSizePixel = 0
+    Main.ClipsDescendants = false  -- IMPORTANT: must be false for drag to work
+    Main.Visible = false  -- hidden until ;scriptblox
+    Main.Parent = Gui
+    Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
+    
+    -- Clip frame inside for content overflow
+    local ClipFrame = Instance.new("Frame")
+    ClipFrame.Size = UDim2.new(1, 0, 1, 0)
+    ClipFrame.BackgroundTransparency = 1
+    ClipFrame.ClipsDescendants = true
+    ClipFrame.ZIndex = 1
+    ClipFrame.Parent = Main
+    
+    -- Accent bar
+    local AccentBar = Instance.new("Frame")
+    AccentBar.Size = UDim2.new(1, 0, 0, 2)
+    AccentBar.BackgroundColor3 = C.Accent
+    AccentBar.BorderSizePixel = 0
+    AccentBar.ZIndex = 5
+    AccentBar.Parent = ClipFrame
+    local AG = Instance.new("UIGradient", AccentBar)
+    AG.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 100, 220)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 180, 255)),
+    })
+    
+    -- =====================
+    --   TITLE BAR (direct child of Main so drag input works)
+    -- =====================
+    local TBar = Instance.new("Frame")
+    TBar.Size = UDim2.new(1, 0, 0, 40)
+    TBar.Position = UDim2.new(0, 0, 0, 2)
+    TBar.BackgroundColor3 = C.Surface
+    TBar.BorderSizePixel = 0
+    TBar.ZIndex = 6
+    TBar.Parent = Main  -- direct child of Main, NOT ClipFrame
+    
+    local TTitle = Instance.new("TextLabel")
+    TTitle.Size = UDim2.new(0, 160, 1, 0)
+    TTitle.Position = UDim2.new(0, 14, 0, 0)
+    TTitle.BackgroundTransparency = 1
+    TTitle.Text = "ScriptBlox Made by Johan"
+    TTitle.TextColor3 = C.Text
+    TTitle.TextSize = 15
+    TTitle.Font = Enum.Font.GothamBold
+    TTitle.TextXAlignment = Enum.TextXAlignment.Left
+    TTitle.ZIndex = 7
+    TTitle.Parent = TBar
+    
+    local function MakeWinBtn(xOff, bg, txt, txtColor)
+        local b = Instance.new("TextButton")
+        b.Size = UDim2.new(0, 28, 0, 28)
+        b.Position = UDim2.new(1, xOff, 0.5, -14)
+        b.BackgroundColor3 = bg
+        b.Text = txt
+        b.TextColor3 = txtColor or C.Text
+        b.TextSize = 13
+        b.Font = Enum.Font.GothamBold
+        b.BorderSizePixel = 0
+        b.ZIndex = 8
+        b.Parent = TBar
+        Instance.new("UICorner", b).CornerRadius = UDim.new(0, 7)
+        return b
+    end
+    
+    local MinBtn   = MakeWinBtn(-66, Color3.fromRGB(45, 48, 60), "-")
+    local CloseBtn = MakeWinBtn(-32, Color3.fromRGB(190, 50, 50), "X", Color3.new(1,1,1))
+    
+    -- =====================
+    --   BODY (inside ClipFrame)
+    -- =====================
+    local Body = Instance.new("Frame")
+    Body.Size = UDim2.new(1, 0, 1, -80)  -- leave room for chat bar at bottom
+    Body.Position = UDim2.new(0, 0, 0, 42)
+    Body.BackgroundTransparency = 1
+    Body.ZIndex = 2
+    Body.Parent = ClipFrame
+    
+    -- Search bar
+    local SF = Instance.new("Frame")
+    SF.Size = UDim2.new(1, -20, 0, 32)
+    SF.Position = UDim2.new(0, 10, 0, 8)
+    SF.BackgroundColor3 = C.Surface
+    SF.BorderSizePixel = 0
+    SF.ZIndex = 3
+    SF.Parent = Body
+    Instance.new("UICorner", SF).CornerRadius = UDim.new(0, 8)
+    local SS = Instance.new("UIStroke", SF)
+    SS.Color = Color3.fromRGB(50, 55, 70)
+    SS.Thickness = 1
+    
+    local SearchIcon = Instance.new("TextLabel")
+    SearchIcon.Size = UDim2.new(0, 28, 1, 0)
+    SearchIcon.Position = UDim2.new(0, 6, 0, 0)
+    SearchIcon.BackgroundTransparency = 1
+    SearchIcon.Text = "[ S ]"
+    SearchIcon.TextColor3 = C.Sub
+    SearchIcon.TextSize = 9
+    SearchIcon.Font = Enum.Font.GothamBold
+    SearchIcon.ZIndex = 4
+    SearchIcon.Parent = SF
+    
+    local SBox = Instance.new("TextBox")
+    SBox.Size = UDim2.new(1, -68, 1, 0)
+    SBox.Position = UDim2.new(0, 32, 0, 0)
+    SBox.BackgroundTransparency = 1
+    SBox.PlaceholderText = "Search scripts..."
+    SBox.PlaceholderColor3 = C.Sub
+    SBox.Text = ""
+    SBox.TextColor3 = C.Text
+    SBox.TextSize = 12
+    SBox.Font = Enum.Font.Gotham
+    SBox.TextXAlignment = Enum.TextXAlignment.Left
+    SBox.ClearTextOnFocus = false
+    SBox.ZIndex = 4
+    SBox.Parent = SF
+    
+    local GoBtn = Instance.new("TextButton")
+    GoBtn.Size = UDim2.new(0, 30, 0, 24)
+    GoBtn.Position = UDim2.new(1, -34, 0.5, -12)
+    GoBtn.BackgroundColor3 = C.Accent
+    GoBtn.Text = "Go"
+    GoBtn.TextColor3 = Color3.new(1,1,1)
+    GoBtn.TextSize = 11
+    GoBtn.Font = Enum.Font.GothamBold
+    GoBtn.BorderSizePixel = 0
+    GoBtn.ZIndex = 5
+    GoBtn.Parent = SF
+    Instance.new("UICorner", GoBtn).CornerRadius = UDim.new(0, 6)
+    
+    -- Status label
+    local Status = Instance.new("TextLabel")
+    Status.Size = UDim2.new(1, -20, 0, 16)
+    Status.Position = UDim2.new(0, 10, 0, 46)
+    Status.BackgroundTransparency = 1
+    Status.Text = "Search for scripts above."
+    Status.TextColor3 = C.Sub
+    Status.TextSize = 10
+    Status.Font = Enum.Font.Gotham
+    Status.TextXAlignment = Enum.TextXAlignment.Left
+    Status.ZIndex = 3
+    Status.Parent = Body
+    
+    -- Scroll frame
+    local Scroll = Instance.new("ScrollingFrame")
+    Scroll.Size = UDim2.new(1, -20, 1, -70)
+    Scroll.Position = UDim2.new(0, 10, 0, 66)
+    Scroll.BackgroundTransparency = 1
+    Scroll.BorderSizePixel = 0
+    Scroll.ScrollBarThickness = 3
+    Scroll.ScrollBarImageColor3 = C.Accent
+    Scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    Scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    Scroll.ZIndex = 3
+    Scroll.Parent = Body
+    
+    local LL = Instance.new("UIListLayout")
+    LL.SortOrder = Enum.SortOrder.LayoutOrder
+    LL.Padding = UDim.new(0, 6)
+    LL.Parent = Scroll
+    
+    -- =====================
+    --   SCRIPTBLOX CHAT BAR (bottom of window)
+    -- =====================
+    local ChatBar = Instance.new("Frame")
+    ChatBar.Size = UDim2.new(1, 0, 0, 36)
+    ChatBar.Position = UDim2.new(0, 0, 1, -36)
+    ChatBar.BackgroundColor3 = C.Surface
+    ChatBar.BorderSizePixel = 0
+    ChatBar.ZIndex = 4
+    ChatBar.Parent = ClipFrame
+    
+    local ChatBarLine = Instance.new("Frame")
+    ChatBarLine.Size = UDim2.new(1, 0, 0, 1)
+    ChatBarLine.Position = UDim2.new(0, 0, 0, 0)
+    ChatBarLine.BackgroundColor3 = Color3.fromRGB(48, 52, 68)
+    ChatBarLine.BorderSizePixel = 0
+    ChatBarLine.ZIndex = 5
+    ChatBarLine.Parent = ChatBar
+    
+    local ChatIcon = Instance.new("Frame")
+    ChatIcon.Size = UDim2.new(0, 6, 0, 6)
+    ChatIcon.Position = UDim2.new(0, 14, 0.5, -3)
+    ChatIcon.BackgroundColor3 = C.Accent
+    ChatIcon.BorderSizePixel = 0
+    ChatIcon.ZIndex = 5
+    ChatIcon.Parent = ChatBar
+    Instance.new("UICorner", ChatIcon).CornerRadius = UDim.new(1, 0)
+    
+    local ChatLabel = Instance.new("TextLabel")
+    ChatLabel.Size = UDim2.new(1, -80, 1, 0)
+    ChatLabel.Position = UDim2.new(0, 28, 0, 0)
+    ChatLabel.BackgroundTransparency = 1
+    ChatLabel.Text = "scriptblox"
+    ChatLabel.TextColor3 = C.Accent
+    ChatLabel.TextSize = 11
+    ChatLabel.Font = Enum.Font.GothamBold
+    ChatLabel.TextXAlignment = Enum.TextXAlignment.Left
+    ChatLabel.ZIndex = 5
+    ChatLabel.Parent = ChatBar
+    
+    local PoweredLabel = Instance.new("TextLabel")
+    PoweredLabel.Size = UDim2.new(0, 120, 1, 0)
+    PoweredLabel.Position = UDim2.new(1, -124, 0, 0)
+    PoweredLabel.BackgroundTransparency = 1
+    PoweredLabel.Text = "Powered by ScriptBlox"
+    PoweredLabel.TextColor3 = C.Sub
+    PoweredLabel.TextSize = 9
+    PoweredLabel.Font = Enum.Font.Gotham
+    PoweredLabel.TextXAlignment = Enum.TextXAlignment.Right
+    PoweredLabel.ZIndex = 5
+    PoweredLabel.Parent = ChatBar
+    
+    -- =====================
+    --   MODAL OVERLAY
+    -- =====================
+    local Overlay = Instance.new("Frame")
+    Overlay.Size = UDim2.new(1, 0, 1, 0)
+    Overlay.BackgroundColor3 = Color3.new(0, 0, 0)
+    Overlay.BackgroundTransparency = 0.45
+    Overlay.BorderSizePixel = 0
+    Overlay.Visible = false
+    Overlay.ZIndex = 10
+    Overlay.Parent = ClipFrame
+    
+    local Modal = Instance.new("Frame")
+    Modal.Size = UDim2.new(0, 290, 0, 238)
+    Modal.AnchorPoint = Vector2.new(0.5, 0.5)
+    Modal.Position = UDim2.new(0.5, 0, 0.5, 0)
+    Modal.BackgroundColor3 = Color3.fromRGB(36, 40, 52)
+    Modal.BorderSizePixel = 0
+    Modal.ZIndex = 11
+    Modal.Parent = Overlay
+    Instance.new("UICorner", Modal).CornerRadius = UDim.new(0, 12)
+    
+    local MTitle = Instance.new("TextLabel")
+    MTitle.Size = UDim2.new(1, -40, 0, 26)
+    MTitle.Position = UDim2.new(0, 14, 0, 12)
+    MTitle.BackgroundTransparency = 1
+    MTitle.Text = "Select Your Option"
+    MTitle.TextColor3 = C.Text
+    MTitle.TextSize = 15
+    MTitle.Font = Enum.Font.GothamBold
+    MTitle.TextXAlignment = Enum.TextXAlignment.Left
+    MTitle.ZIndex = 12
+    MTitle.Parent = Modal
+    
+    local MSub = Instance.new("TextLabel")
+    MSub.Size = UDim2.new(1, -28, 0, 30)
+    MSub.Position = UDim2.new(0, 14, 0, 36)
+    MSub.BackgroundTransparency = 1
+    MSub.Text = "Choose whether to execute, open in a new tab, etc.."
+    MSub.TextColor3 = C.Sub
+    MSub.TextSize = 10
+    MSub.Font = Enum.Font.Gotham
+    MSub.TextXAlignment = Enum.TextXAlignment.Left
+    MSub.TextWrapped = true
+    MSub.ZIndex = 12
+    MSub.Parent = Modal
+    
+    local MClose = Instance.new("TextButton")
+    MClose.Size = UDim2.new(0, 24, 0, 24)
+    MClose.Position = UDim2.new(1, -28, 0, 8)
+    MClose.BackgroundTransparency = 1
+    MClose.Text = "X"
+    MClose.TextColor3 = C.Sub
+    MClose.TextSize = 13
+    MClose.Font = Enum.Font.GothamBold
+    MClose.BorderSizePixel = 0
+    MClose.ZIndex = 13
+    MClose.Parent = Modal
+    
+    local function MakeModalBtn(label, yPos)
+        local b = Instance.new("TextButton")
+        b.Size = UDim2.new(1, -28, 0, 32)
+        b.Position = UDim2.new(0, 14, 0, yPos)
+        b.BackgroundColor3 = Color3.fromRGB(44, 50, 66)
+        b.Text = label
+        b.TextColor3 = C.Text
+        b.TextSize = 10
+        b.Font = Enum.Font.GothamBold
+        b.BorderSizePixel = 0
+        b.ZIndex = 12
+        b.Parent = Modal
+        Instance.new("UICorner", b).CornerRadius = UDim.new(0, 8)
+        Instance.new("UIStroke", b).Color = C.Accent
+        b.MouseEnter:Connect(function()
+            TweenService:Create(b, TweenInfo.new(0.12), {BackgroundColor3 = Color3.fromRGB(55, 65, 88)}):Play()
+        end)
+        b.MouseLeave:Connect(function()
+            TweenService:Create(b, TweenInfo.new(0.12), {BackgroundColor3 = Color3.fromRGB(44, 50, 66)}):Play()
+        end)
+        return b
+    end
+    
+    local BtnExecute = MakeModalBtn("EXECUTE SELECTED SCRIPT",  70)
+    local BtnEditor  = MakeModalBtn("OPEN SCRIPT IN EDITOR",   110)
+    local BtnSave    = MakeModalBtn("SAVE SELECTED SCRIPT",    150)
+    local BtnCopy    = MakeModalBtn("COPY TO CLIPBOARD",       190)
+    
+    -- =====================
+    --   MODAL LOGIC
+    -- =====================
+    local selectedScript = nil
+    
+    local function OpenModal(data)
+        selectedScript = data
+        BtnExecute.Text = "EXECUTE SELECTED SCRIPT"
+        BtnEditor.Text  = "OPEN SCRIPT IN EDITOR"
+        BtnSave.Text    = "SAVE SELECTED SCRIPT"
+        BtnCopy.Text    = "COPY TO CLIPBOARD"
+        Overlay.Visible = true
+        Modal.Size = UDim2.new(0, 0, 0, 0)
+        TweenService:Create(Modal, TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, 290, 0, 238)
+        }):Play()
+    end
+    
+    local function CloseModal()
+        TweenService:Create(Modal, TweenInfo.new(0.15), {Size = UDim2.new(0, 0, 0, 0)}):Play()
+        task.wait(0.18)
+        Overlay.Visible = false
+        selectedScript = nil
+    end
+    
+    MClose.MouseButton1Click:Connect(CloseModal)
+    
+    BtnExecute.MouseButton1Click:Connect(function()
+        if not selectedScript then return end
+        local src = selectedScript.script
+        if not src or src == "" then
+            BtnExecute.Text = "No Script Content"
+            task.wait(2); BtnExecute.Text = "EXECUTE SELECTED SCRIPT"
+            return
+        end
+        CloseModal()
+        task.spawn(function()
+            local fn, err = loadstring(src)
+            if fn then
+                local ok, runErr = pcall(fn)
+                if not ok then warn("GhostHub Execute Error: " .. tostring(runErr)) end
+            else
+                warn("GhostHub Loadstring Error: " .. tostring(err))
+            end
+        end)
+    end)
+    
+    BtnEditor.MouseButton1Click:Connect(function()
+        if not selectedScript then return end
+        pcall(setclipboard, selectedScript.script or "")
+        BtnEditor.Text = "Copied to Clipboard"
+        task.wait(2); BtnEditor.Text = "OPEN SCRIPT IN EDITOR"
+    end)
+    
+    BtnSave.MouseButton1Click:Connect(function()
+        if not selectedScript then return end
+        local name = (selectedScript.title or "script"):gsub("[^%w%s]", ""):gsub("%s+", "_")
+        local ok = pcall(writefile, name .. ".lua", selectedScript.script or "")
+        BtnSave.Text = ok and "Saved!" or "Save Failed"
+        task.wait(2); BtnSave.Text = "SAVE SELECTED SCRIPT"
+    end)
+    
+    BtnCopy.MouseButton1Click:Connect(function()
+        if not selectedScript then return end
+        pcall(setclipboard, selectedScript.script or "")
+        BtnCopy.Text = "Copied!"
+        task.wait(2); BtnCopy.Text = "COPY TO CLIPBOARD"
+    end)
+    
+    -- =====================
+    --   THUMBNAIL FETCH
+    -- =====================
+    local function FetchThumbnail(gameId, imageLabel)
+        task.spawn(function()
+            local ok, res = pcall(game.HttpGet, game,
+                string.format(C.ThumbAPI, tostring(gameId))
+            )
+            if not ok then return end
+            local ok2, data = pcall(HttpService.JSONDecode, HttpService, res)
+            if not ok2 then return end
+            if data and data.data and data.data[1] then
+                local url = data.data[1].imageUrl
+                if url and url ~= "" then
+                    imageLabel.Image = url
+                end
+            end
+        end)
+    end
+    
+    -- =====================
+    --   SCRIPT CARDS
+    -- =====================
+    local function ClearCards()
+        for _, c in ipairs(Scroll:GetChildren()) do
+            if c:IsA("Frame") then c:Destroy() end
+        end
+    end
+    
+    local function MakeCard(data, idx)
+        local card = Instance.new("Frame")
+        card.Size = UDim2.new(1, 0, 0, 72)
+        card.BackgroundColor3 = C.Card
+        card.BorderSizePixel = 0
+        card.LayoutOrder = idx
+        card.ZIndex = 3
+        card.Parent = Scroll
+        Instance.new("UICorner", card).CornerRadius = UDim.new(0, 8)
+        local cs = Instance.new("UIStroke", card)
+        cs.Color = Color3.fromRGB(48, 52, 68)
+        cs.Thickness = 1
+    
+        -- Thumbnail
+        local thumb = Instance.new("ImageLabel")
+        thumb.Size = UDim2.new(0, 58, 0, 58)
+        thumb.Position = UDim2.new(0, 8, 0.5, -29)
+        thumb.BackgroundColor3 = Color3.fromRGB(30, 33, 44)
+        thumb.BorderSizePixel = 0
+        thumb.Image = ""
+        thumb.ScaleType = Enum.ScaleType.Crop
+        thumb.ZIndex = 4
+        thumb.Parent = card
+        Instance.new("UICorner", thumb).CornerRadius = UDim.new(0, 6)
+    
+        -- Placeholder text while loading
+        local ph = Instance.new("TextLabel")
+        ph.Size = UDim2.new(1, 0, 1, 0)
+        ph.BackgroundTransparency = 1
+        ph.Text = "..."
+        ph.TextColor3 = C.Sub
+        ph.TextSize = 10
+        ph.Font = Enum.Font.Gotham
+        ph.ZIndex = 5
+        ph.Parent = thumb
+    
+        local gameId = data.game and data.game.gameId
+        if gameId and gameId ~= 0 then
+            FetchThumbnail(gameId, thumb)
+            thumb:GetPropertyChangedSignal("Image"):Connect(function()
+                if thumb.Image ~= "" then ph.Visible = false end
+            end)
+        end
+    
+        -- Verified badge
+        if data.verified then
+            local vb = Instance.new("TextLabel")
+            vb.Size = UDim2.new(0, 54, 0, 14)
+            vb.Position = UDim2.new(1, -60, 0, 8)
+            vb.BackgroundColor3 = Color3.fromRGB(40, 100, 200)
+            vb.Text = "VERIFIED"
+            vb.TextColor3 = Color3.new(1,1,1)
+            vb.TextSize = 7
+            vb.Font = Enum.Font.GothamBold
+            vb.BorderSizePixel = 0
+            vb.ZIndex = 5
+            vb.Parent = card
+            Instance.new("UICorner", vb).CornerRadius = UDim.new(0, 4)
+        end
+    
+        local title = Instance.new("TextLabel")
+        title.Size = UDim2.new(1, -130, 0, 18)
+        title.Position = UDim2.new(0, 74, 0, 10)
+        title.BackgroundTransparency = 1
+        title.Text = data.title or "Unknown"
+        title.TextColor3 = C.Text
+        title.TextSize = 12
+        title.Font = Enum.Font.GothamBold
+        title.TextXAlignment = Enum.TextXAlignment.Left
+        title.TextTruncate = Enum.TextTruncate.AtEnd
+        title.ZIndex = 4
+        title.Parent = card
+    
+        local gameLbl = Instance.new("TextLabel")
+        gameLbl.Size = UDim2.new(1, -130, 0, 14)
+        gameLbl.Position = UDim2.new(0, 74, 0, 29)
+        gameLbl.BackgroundTransparency = 1
+        gameLbl.Text = data.isUniversal and "Universal Script" or (data.game and data.game.name or "Unknown Game")
+        gameLbl.TextColor3 = C.Sub
+        gameLbl.TextSize = 10
+        gameLbl.Font = Enum.Font.Gotham
+        gameLbl.TextXAlignment = Enum.TextXAlignment.Left
+        gameLbl.TextTruncate = Enum.TextTruncate.AtEnd
+        gameLbl.ZIndex = 4
+        gameLbl.Parent = card
+    
+        local viewsLbl = Instance.new("TextLabel")
+        viewsLbl.Size = UDim2.new(1, -130, 0, 13)
+        viewsLbl.Position = UDim2.new(0, 74, 0, 48)
+        viewsLbl.BackgroundTransparency = 1
+    
+        local meta = tostring(data.views or 0) .. " Views"
+        if data.isPatched then meta = meta .. "  [Patched]" end
+        if data.key then meta = meta .. "  [Key]" end
+        viewsLbl.Text = meta
+        viewsLbl.TextColor3 = C.Sub
+        viewsLbl.TextSize = 9
+        viewsLbl.Font = Enum.Font.Gotham
+        viewsLbl.TextXAlignment = Enum.TextXAlignment.Left
+        viewsLbl.ZIndex = 4
+        viewsLbl.Parent = card
+    
+        local clickArea = Instance.new("TextButton")
+        clickArea.Size = UDim2.new(1, 0, 1, 0)
+        clickArea.BackgroundTransparency = 1
+        clickArea.Text = ""
+        clickArea.ZIndex = 6
+        clickArea.Parent = card
+        clickArea.MouseButton1Click:Connect(function() OpenModal(data) end)
+    
+        card.MouseEnter:Connect(function()
+            TweenService:Create(card, TweenInfo.new(0.12), {BackgroundColor3 = Color3.fromRGB(45, 50, 65)}):Play()
+        end)
+        card.MouseLeave:Connect(function()
+            TweenService:Create(card, TweenInfo.new(0.12), {BackgroundColor3 = C.Card}):Play()
+        end)
+    end
+    
+    -- =====================
+    --   SEARCH
+    -- =====================
+    local function DoSearch(q)
+        q = q:match("^%s*(.-)%s*$")
+        if q == "" then return end
+        ClearCards()
+        Status.Text = "Searching..."
+        Status.TextColor3 = C.Accent
+    
+        local ok, res = pcall(game.HttpGet, game, string.format(C.API, HttpService:UrlEncode(q)))
+        if not ok then
+            Status.Text = "HTTP request failed. Enable HTTP requests."
+            Status.TextColor3 = C.Red
+            return
+        end
+    
+        local ok2, data = pcall(HttpService.JSONDecode, HttpService, res)
+        if not ok2 or not data or not data.result then
+            Status.Text = "Could not parse response."
+            Status.TextColor3 = C.Red
+            return
+        end
+    
+        local scripts = data.result.scripts
+        if not scripts or #scripts == 0 then
+            Status.Text = 'No results for "' .. q .. '"'
+            Status.TextColor3 = C.Sub
+            return
+        end
+    
+        Status.Text = #scripts .. ' results for "' .. q .. '"'
+        Status.TextColor3 = C.Green
+    
+        for i, s in ipairs(scripts) do
+            MakeCard(s, i)
+        end
+    end
+    
+    GoBtn.MouseButton1Click:Connect(function() DoSearch(SBox.Text) end)
+    SBox.FocusLost:Connect(function(enter) if enter then DoSearch(SBox.Text) end end)
+    
+    -- =====================
+    --   DRAGGING (on Main directly)
+    -- =====================
+    local dragging = false
+    local dragStart, startPos
+    
+    TBar.InputBegan:Connect(function(inp)
+        if inp.UserInputType == Enum.UserInputType.MouseButton1 or
+           inp.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = inp.Position
+            startPos = Main.Position
+        end
+    end)
+    
+    TBar.InputEnded:Connect(function(inp)
+        if inp.UserInputType == Enum.UserInputType.MouseButton1 or
+           inp.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(inp)
+        if dragging and (inp.UserInputType == Enum.UserInputType.MouseMovement or
+                         inp.UserInputType == Enum.UserInputType.Touch) then
+            local delta = inp.Position - dragStart
+            Main.Position = UDim2.new(
+                startPos.X.Scale, startPos.X.Offset + delta.X,
+                startPos.Y.Scale, startPos.Y.Offset + delta.Y
+            )
+            -- Keep shadow in sync
+            Shadow.Position = UDim2.new(
+                startPos.X.Scale, startPos.X.Offset + delta.X + 240,
+                startPos.Y.Scale, startPos.Y.Offset + delta.Y + 185 + 6
+            )
+        end
+    end)
+    
+    -- =====================
+    --   SHOW / HIDE
+    -- =====================
+    local minimized = false
+    local guiVisible = false
+    local FULL_H = 370
+    local MINI_H = 42
+    
+    local function ShowGUI()
+        Main.Size = UDim2.new(0, 480, 0, 0)
+        Main.Visible = true
+        Shadow.Visible = true
+        TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, 480, 0, FULL_H)
+        }):Play()
+    end
+    
+    local function HideGUI()
+        TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Quart), {
+            Size = UDim2.new(0, 480, 0, 0)
+        }):Play()
+        task.wait(0.22)
+        Main.Visible = false
+        Shadow.Visible = false
+    end
+    
+    -- =====================
+    --   MINIMIZE / CLOSE
+    -- =====================
+    MinBtn.MouseButton1Click:Connect(function()
+        minimized = not minimized
+        local targetH = minimized and MINI_H or FULL_H
+        ClipFrame.Visible = not minimized
+        SBox.TextEditable = not minimized
+        TweenService:Create(Main, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
+            Size = UDim2.new(0, 480, 0, targetH)
+        }):Play()
+        MinBtn.Text = minimized and "+" or "-"
+    end)
+    
+    CloseBtn.MouseButton1Click:Connect(function()
+        guiVisible = false
+        HideGUI()
+    end)
+    
+    -- =====================
+    --   OPEN ANIMATION (plays when toggled visible via ;scriptblox)
+    -- =====================
+    local function ShowGUI()
+        Main.Size = UDim2.new(0, 480, 0, 0)
+        Main.Visible = true
+        Shadow.Visible = true
+        TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, 480, 0, FULL_H)
+        }):Play()
+    end
+    
+    local function HideGUI()
+        TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Quart), {
+            Size = UDim2.new(0, 480, 0, 0)
+        }):Play()
+        task.wait(0.22)
+        Main.Visible = false
+        Shadow.Visible = false
+    end
+    
+    -- =====================
+    --   CHAT COMMAND: ;scriptblox
+    -- =====================
+    Players.LocalPlayer.Chatted:Connect(function(msg)
+        if msg:lower() == ";scriptblox" then
+            guiVisible = not guiVisible
+            if guiVisible then
+                ShowGUI()
+            else
+                HideGUI()
+            end
+        end
+    end)
+    
+    print("GhostHub loaded!")
+    
 end
 
 -- kill funtions
