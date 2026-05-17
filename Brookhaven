@@ -2466,8 +2466,9 @@ local function openScriptBlox()
         Main.Visible = false
         Shadow.Visible = false
     end
-    
+
     print("GhostHub loaded!")
+    ShowGUI()
     
 end
 
