@@ -2923,6 +2923,42 @@ game:GetService("RunService").RenderStepped:Connect(function()
     if flyBg then flyBg.CFrame = cam.CFrame end
 end)
 
+-- Noclip System
+local noclipActive = false
+local noclipConnection = nil
+
+local function doNoclip()
+    if noclipActive then return end
+    noclipActive = true
+    noclipConnection = game:GetService("RunService").Stepped:Connect(function()
+        local character = player.Character
+        if character then
+            for _, part in ipairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end)
+end
+
+local function doUnnoclip()
+    if not noclipActive then return end
+    noclipActive = false
+    if noclipConnection then
+        noclipConnection:Disconnect()
+        noclipConnection = nil
+    end
+    local character = player.Character
+    if character then
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+            end
+        end
+    end
+end
+
 -- Spectate functions
 local function stopSpectating()
     if isSpectating then
@@ -3379,6 +3415,8 @@ local function showCommandsPanel()
     end
     
     local commands = {
+        {cmd = "noclip", desc = "Enable noclip", rank = "Moderator", rankLevel = 60},
+        {cmd = "unnoclip", desc = "Disable noclip", rank = "Moderator", rankLevel = 60},
         {cmd = "scriptblox", desc = "Open ScriptBlox", rank = "Member", rankLevel = 10},
         {cmd = "fly", desc = "Fly around", rank = "Moderator", rankLevel = 60},
         {cmd = "unfly", desc = "Stop flying", rank = "Moderator", rankLevel = 60},
@@ -3577,6 +3615,26 @@ elseif command == "unloopkill" then
             end
         end
     end
+
+    elseif command == "noclip" then
+        if not hasPermission(player, "Moderator") then
+            addLog("Permission denied: Moderator required")
+            return
+        end
+        doNoclip()
+        addLog(player.Name .. " enabled noclip")
+        commandCount = commandCount + 1
+        counterLabel.Text = tostring(commandCount)
+
+    elseif command == "unnoclip" then
+        if not hasPermission(player, "Moderator") then
+            addLog("Permission denied: Moderator required")
+            return
+        end
+        doUnnoclip()
+        addLog(player.Name .. " disabled noclip")
+        commandCount = commandCount + 1
+        counterLabel.Text = tostring(commandCount)
 
     elseif command == "view" or command == "spectate" then
         if not hasPermission(player, "Moderator") then
