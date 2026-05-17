@@ -3043,6 +3043,7 @@ elseif command == "unloopkill" then
             return
         end
         stopFly()
+        flyFrame.Visible = false
         addLog(player.Name .. " stopped flying")
         commandCount = commandCount + 1
         counterLabel.Text = tostring(commandCount)
