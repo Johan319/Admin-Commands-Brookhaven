@@ -2467,20 +2467,6 @@ local function openScriptBlox()
         Shadow.Visible = false
     end
     
-    -- =====================
-    --   CHAT COMMAND: ;scriptblox
-    -- =====================
-    Players.LocalPlayer.Chatted:Connect(function(msg)
-        if msg:lower() == ";scriptblox" then
-            guiVisible = not guiVisible
-            if guiVisible then
-                ShowGUI()
-            else
-                HideGUI()
-            end
-        end
-    end)
-    
     print("GhostHub loaded!")
     
 end
