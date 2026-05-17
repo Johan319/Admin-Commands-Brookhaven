@@ -2150,7 +2150,6 @@ stopFly = function()
     flyToggle.Text = "ENABLE"
     flyStatusValue.Text = "Off"
     flyStatusValue.TextColor3 = Color3.fromRGB(220, 60, 60)
-    flyFrame.Visible = false
 end
 
 flyToggle.MouseButton1Click:Connect(function()
