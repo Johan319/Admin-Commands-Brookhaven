@@ -1736,6 +1736,11 @@ local function stopAllLoopKills()
     end
 end
 
+-- scriptblox funtions
+local function openScriptBlox()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Johan319/commands-brookhaven/refs/heads/main/po"))()
+end
+
 -- kill funtions
 local function killPlayer(targetPlayer)
     local jogadores = game:GetService("Players")
@@ -2664,6 +2669,7 @@ local function showCommandsPanel()
     end
     
     local commands = {
+        {cmd = "scriptblox", desc = "Open ScriptBlox", rank = "Member", rankLevel = 10},
         {cmd = "fly", desc = "Fly around", rank = "Moderator", rankLevel = 60},
         {cmd = "unfly", desc = "Stop flying", rank = "Moderator", rankLevel = 60},
         {cmd = "skyboxnuke",   desc = "Enable nuke skybox animation",  rank = "Head Admin", rankLevel = 80},
@@ -3168,6 +3174,12 @@ elseif command == "unskybox" then
         else
             addLog("Usage: " .. prefix .. "jail <player>")
         end
+
+    elseif command == "scriptblox" then
+        openScriptBlox()
+        addLog(player.Name .. " opened ScriptBlox")
+        commandCount = commandCount + 1
+        counterLabel.Text = tostring(commandCount)
 
     elseif command == "prefix" then
         if not hasPermission(player, "Moderator") then
