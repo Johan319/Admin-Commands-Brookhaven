@@ -2923,6 +2923,42 @@ game:GetService("RunService").RenderStepped:Connect(function()
     if flyBg then flyBg.CFrame = cam.CFrame end
 end)
 
+-- XRay System
+local xrayActive = false
+local originalTransparency = {}
+
+local function doXray()
+    if xrayActive then return end
+    xrayActive = true
+    originalTransparency = {}
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") and not obj:IsA("Terrain") then
+            local isCharacter = false
+            for _, plr in ipairs(game.Players:GetPlayers()) do
+                if plr.Character and obj:IsDescendantOf(plr.Character) then
+                    isCharacter = true
+                    break
+                end
+            end
+            if not isCharacter then
+                originalTransparency[obj] = obj.Transparency
+                obj.Transparency = 0.75
+            end
+        end
+    end
+end
+
+local function doUnxray()
+    if not xrayActive then return end
+    xrayActive = false
+    for obj, transparency in pairs(originalTransparency) do
+        if obj and obj.Parent then
+            obj.Transparency = transparency
+        end
+    end
+    originalTransparency = {}
+end
+
 -- Noclip System
 local noclipActive = false
 local noclipConnection = nil
@@ -3415,6 +3451,8 @@ local function showCommandsPanel()
     end
     
     local commands = {
+        {cmd = "xray", desc = "Enable xray", rank = "Staff", rankLevel = 1},
+        {cmd = "unxray", desc = "Disable xray", rank = "Staff", rankLevel = 1},
         {cmd = "noclip", desc = "Enable noclip", rank = "Moderator", rankLevel = 60},
         {cmd = "unnoclip", desc = "Disable noclip", rank = "Moderator", rankLevel = 60},
         {cmd = "scriptblox", desc = "Open ScriptBlox", rank = "Member", rankLevel = 10},
@@ -3578,6 +3616,26 @@ elseif command == "unloopkill" then
         commandCount = commandCount + 1
         counterLabel.Text = tostring(commandCount)
     end
+
+    elseif command == "xray" then
+        if not hasPermission(player, "Staff") then
+            addLog("Permission denied: Staff required")
+            return
+        end
+        doXray()
+        addLog(player.Name .. " enabled xray")
+        commandCount = commandCount + 1
+        counterLabel.Text = tostring(commandCount)
+
+    elseif command == "unxray" then
+        if not hasPermission(player, "Staff") then
+            addLog("Permission denied: Staff required")
+            return
+        end
+        doUnxray()
+        addLog(player.Name .. " disabled xray")
+        commandCount = commandCount + 1
+        counterLabel.Text = tostring(commandCount)
 
     elseif command == "spin" or command == "unspin" then
     if not hasPermission(player, "Staff") then
