@@ -1742,9 +1742,7 @@ end
 local ok, result = pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Johan319/commands-brookhaven/refs/heads/main/po"))()
     end)
-    if not ok then
-        addLog("ScriptBlox failed: " .. tostring(result))
-    end
+    if not ok then addLog("ScriptBlox failed: " .. tostring(result)) end
 
 -- kill funtions
 local function killPlayer(targetPlayer)
