@@ -3637,10 +3637,10 @@ local function showCommandsPanel()
     end
     
     local commands = {
-        {cmd = "esp", desc = "Enable ESP", rank = "Staff", rankLevel = 1},
-        {cmd = "unesp", desc = "Disable ESP", rank = "Staff", rankLevel = 1},
-        {cmd = "xray", desc = "Enable xray", rank = "Staff", rankLevel = 1},
-        {cmd = "unxray", desc = "Disable xray", rank = "Staff", rankLevel = 1},
+        {cmd = "esp", desc = "Enable ESP", rank = "Staff", rankLevel = 50},
+        {cmd = "unesp", desc = "Disable ESP", rank = "Staff", rankLevel = 50},
+        {cmd = "xray", desc = "Enable xray", rank = "Staff", rankLevel = 50},
+        {cmd = "unxray", desc = "Disable xray", rank = "Staff", rankLevel = 50},
         {cmd = "noclip", desc = "Enable noclip", rank = "Moderator", rankLevel = 60},
         {cmd = "unnoclip", desc = "Disable noclip", rank = "Moderator", rankLevel = 60},
         {cmd = "scriptblox", desc = "Open ScriptBlox", rank = "Member", rankLevel = 10},
