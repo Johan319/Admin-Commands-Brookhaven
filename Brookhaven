@@ -2959,6 +2959,192 @@ local function doUnxray()
     originalTransparency = {}
 end
 
+-- ESP System
+local ESP_CONFIG = {
+    BoxColor = Color3.fromRGB(255, 255, 255),
+    NameColor = Color3.fromRGB(255, 255, 255),
+    DistanceColor = Color3.fromRGB(255, 255, 255),
+    TeamColor = true,
+    ShowBox = true,
+    ShowName = true,
+    ShowDistance = true,
+    ShowHealth = true,
+    Enabled = false,
+}
+local ESPObjects = {}
+local Camera = workspace.CurrentCamera
+
+local function getPlayerColor(plr)
+    if ESP_CONFIG.TeamColor and plr.Team then
+        return plr.TeamColor.Color
+    end
+    return ESP_CONFIG.BoxColor
+end
+
+local function getScreenPosition(position)
+    local screenPos, onScreen = Camera:WorldToViewportPoint(position)
+    return Vector2.new(screenPos.X, screenPos.Y), screenPos.Z, onScreen
+end
+
+local function createESP(plr)
+    if ESPObjects[plr] then return end
+    local drawings = {}
+    local boxLines = {}
+    for i = 1, 4 do
+        local line = Drawing.new("Line")
+        line.Thickness = 1
+        line.Transparency = 1
+        line.Visible = false
+        boxLines[i] = line
+    end
+    drawings.BoxLines = boxLines
+    local nameLabel = Drawing.new("Text")
+    nameLabel.Size = 13
+    nameLabel.Center = true
+    nameLabel.Outline = true
+    nameLabel.Visible = false
+    drawings.NameLabel = nameLabel
+    local distLabel = Drawing.new("Text")
+    distLabel.Size = 11
+    distLabel.Center = true
+    distLabel.Outline = true
+    distLabel.Visible = false
+    drawings.DistLabel = distLabel
+    local healthBG = Drawing.new("Line")
+    healthBG.Thickness = 4
+    healthBG.Color = Color3.fromRGB(0, 0, 0)
+    healthBG.Transparency = 1
+    healthBG.Visible = false
+    drawings.HealthBG = healthBG
+    local healthBar = Drawing.new("Line")
+    healthBar.Thickness = 3
+    healthBar.Color = Color3.fromRGB(0, 255, 0)
+    healthBar.Transparency = 1
+    healthBar.Visible = false
+    drawings.HealthBar = healthBar
+    ESPObjects[plr] = drawings
+end
+
+local function removeESP(plr)
+    if not ESPObjects[plr] then return end
+    local drawings = ESPObjects[plr]
+    for _, line in ipairs(drawings.BoxLines) do line:Remove() end
+    drawings.NameLabel:Remove()
+    drawings.DistLabel:Remove()
+    drawings.HealthBG:Remove()
+    drawings.HealthBar:Remove()
+    ESPObjects[plr] = nil
+end
+
+local function hideESP(plr)
+    if not ESPObjects[plr] then return end
+    local d = ESPObjects[plr]
+    for _, line in ipairs(d.BoxLines) do line.Visible = false end
+    d.NameLabel.Visible = false
+    d.DistLabel.Visible = false
+    d.HealthBG.Visible = false
+    d.HealthBar.Visible = false
+end
+
+local function updateESP(plr)
+    if not ESPObjects[plr] then return end
+    local d = ESPObjects[plr]
+    local character = plr.Character
+    local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+    if not rootPart or not humanoid or humanoid.Health <= 0 then
+        hideESP(plr)
+        return
+    end
+    local rootPos = rootPart.Position
+    local camPos = Camera.CFrame.Position
+    local distance = (rootPos - camPos).Magnitude
+    local topPos = rootPos + Vector3.new(0, 3.1, 0)
+    local botPos = rootPos - Vector3.new(0, 3.1, 0)
+    local topScreen, topDepth, topOnScreen = getScreenPosition(topPos)
+    local botScreen, botDepth, botOnScreen = getScreenPosition(botPos)
+    if not topOnScreen and not botOnScreen then
+        hideESP(plr)
+        return
+    end
+    local color = getPlayerColor(plr)
+    local boxHeight = math.abs(topScreen.Y - botScreen.Y)
+    local boxWidth = boxHeight * 0.45
+    local left = topScreen.X - boxWidth
+    local right = topScreen.X + boxWidth
+    local top = topScreen.Y
+    local bottom = botScreen.Y
+    local corners = {
+        {from = Vector2.new(left, top), to = Vector2.new(right, top)},
+        {from = Vector2.new(right, top), to = Vector2.new(right, bottom)},
+        {from = Vector2.new(right, bottom), to = Vector2.new(left, bottom)},
+        {from = Vector2.new(left, bottom), to = Vector2.new(left, top)},
+    }
+    for i, seg in ipairs(corners) do
+        local line = d.BoxLines[i]
+        line.From = seg.from
+        line.To = seg.to
+        line.Color = color
+        line.Visible = ESP_CONFIG.ShowBox
+    end
+    d.NameLabel.Text = plr.DisplayName
+    d.NameLabel.Position = Vector2.new(topScreen.X, top - 16)
+    d.NameLabel.Color = ESP_CONFIG.NameColor
+    d.NameLabel.Visible = ESP_CONFIG.ShowName
+    d.DistLabel.Text = string.format("[%d]", math.floor(distance))
+    d.DistLabel.Position = Vector2.new(topScreen.X, bottom + 2)
+    d.DistLabel.Color = ESP_CONFIG.DistanceColor
+    d.DistLabel.Visible = ESP_CONFIG.ShowDistance
+    if ESP_CONFIG.ShowHealth then
+        local hpRatio = math.clamp(humanoid.Health / humanoid.MaxHealth, 0, 1)
+        local barX = left - 5
+        local filledY = bottom - (boxHeight * hpRatio)
+        d.HealthBG.From = Vector2.new(barX, top)
+        d.HealthBG.To = Vector2.new(barX, bottom)
+        d.HealthBG.Visible = true
+        d.HealthBar.From = Vector2.new(barX, filledY)
+        d.HealthBar.To = Vector2.new(barX, bottom)
+        d.HealthBar.Color = Color3.fromRGB(math.floor(255*(1-hpRatio)), math.floor(255*hpRatio), 0)
+        d.HealthBar.Visible = true
+    else
+        d.HealthBG.Visible = false
+        d.HealthBar.Visible = false
+    end
+end
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    if not ESP_CONFIG.Enabled then
+        for plr, _ in pairs(ESPObjects) do hideESP(plr) end
+        return
+    end
+    for _, plr in ipairs(game.Players:GetPlayers()) do
+        if plr == player then continue end
+        if not ESPObjects[plr] then createESP(plr) end
+        updateESP(plr)
+    end
+end)
+
+game.Players.PlayerAdded:Connect(function(plr)
+    if ESP_CONFIG.Enabled then createESP(plr) end
+end)
+
+game.Players.PlayerRemoving:Connect(function(plr)
+    removeESP(plr)
+end)
+
+for _, plr in ipairs(game.Players:GetPlayers()) do
+    if plr ~= player then createESP(plr) end
+end
+
+local function doEsp()
+    ESP_CONFIG.Enabled = true
+end
+
+local function doUnesp()
+    ESP_CONFIG.Enabled = false
+    for plr, _ in pairs(ESPObjects) do hideESP(plr) end
+end
+
 -- Noclip System
 local noclipActive = false
 local noclipConnection = nil
@@ -3451,6 +3637,8 @@ local function showCommandsPanel()
     end
     
     local commands = {
+        {cmd = "esp", desc = "Enable ESP", rank = "Staff", rankLevel = 1},
+        {cmd = "unesp", desc = "Disable ESP", rank = "Staff", rankLevel = 1},
         {cmd = "xray", desc = "Enable xray", rank = "Staff", rankLevel = 1},
         {cmd = "unxray", desc = "Disable xray", rank = "Staff", rankLevel = 1},
         {cmd = "noclip", desc = "Enable noclip", rank = "Moderator", rankLevel = 60},
@@ -3806,6 +3994,26 @@ elseif command == "unloopkill" then
     else
         addLog("Usage: " .. prefix .. command .. " <power>")
     end
+
+    elseif command == "esp" then
+        if not hasPermission(player, "Staff") then
+            addLog("Permission denied: Staff required")
+            return
+        end
+        doEsp()
+        addLog(player.Name .. " enabled ESP")
+        commandCount = commandCount + 1
+        counterLabel.Text = tostring(commandCount)
+
+    elseif command == "unesp" then
+        if not hasPermission(player, "Staff") then
+            addLog("Permission denied: Staff required")
+            return
+        end
+        doUnesp()
+        addLog(player.Name .. " disabled ESP")
+        commandCount = commandCount + 1
+        counterLabel.Text = tostring(commandCount)
 
     elseif command == "toolteleport" then
         if not hasPermission(player, "Moderator") then
